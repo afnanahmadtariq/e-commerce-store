@@ -57,7 +57,7 @@ CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ isActive: 1, order: 1 });
 
 // Generate slug before saving
-CategorySchema.pre('save', async function () {
+CategorySchema.pre('save', function() {
   if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
