@@ -159,7 +159,7 @@ const ProductSchema = new Schema<IProductDocument>({
 });
 
 // Virtual for available quantity
-ProductSchema.virtual('availableQuantity').get(function(this: IProductDocument) {
+ProductSchema.virtual('availableQuantity').get(function (this: IProductDocument) {
   return this.inventory.quantity - this.inventory.reservedQuantity;
 });
 
@@ -172,14 +172,13 @@ ProductSchema.index({ createdAt: -1 });
 ProductSchema.index({ isActive: 1, isFeatured: 1 });
 
 // Generate slug before saving
-ProductSchema.pre('save', function(next) {
+ProductSchema.pre('save', async function () {
   if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  next();
 });
 
 export const Product = mongoose.model<IProductDocument>('Product', ProductSchema);

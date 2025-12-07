@@ -24,7 +24,6 @@ const CouponSchema = new Schema<ICouponDocument>({
   code: {
     type: String,
     required: [true, 'Coupon code is required'],
-    unique: true,
     uppercase: true,
     trim: true,
   },
@@ -88,7 +87,7 @@ const CouponSchema = new Schema<ICouponDocument>({
 });
 
 // Indexes
-CouponSchema.index({ code: 1 });
+CouponSchema.index({ code: 1 }, { unique: true });
 CouponSchema.index({ validFrom: 1, validUntil: 1, isActive: 1 });
 
 export const Coupon = mongoose.model<ICouponDocument>('Coupon', CouponSchema);

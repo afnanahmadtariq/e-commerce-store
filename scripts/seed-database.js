@@ -1,16 +1,154 @@
 /**
- * Database Seed Script
- * Run with: npm run db:seed
- * 
- * This script populates the database with sample data for testing.
+ * Database Seeding Script for E-Commerce Platform
+ * Run with: node scripts/seed-database.js
  */
+
+const fs = require('fs');
+const path = require('path');
+
+// Load environment variables from .env.local or .env
+const envFile = fs.existsSync(path.join(__dirname, '../.env.local'))
+  ? '.env.local'
+  : '.env';
+require('dotenv').config({ path: path.join(__dirname, '..', envFile) });
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce';
+// MongoDB connection
+const dbConfigs = {
+  users: process.env.MONGODB_URI?.replace(/\/[^/]*(\?|$)/, `/ecommerce_users$1`) || 'mongodb://localhost:27017/ecommerce_users',
+  products: process.env.MONGODB_URI?.replace(/\/[^/]*(\?|$)/, `/ecommerce_products$1`) || 'mongodb://localhost:27017/ecommerce_products',
+  carts: process.env.MONGODB_URI?.replace(/\/[^/]*(\?|$)/, `/ecommerce_carts$1`) || 'mongodb://localhost:27017/ecommerce_carts',
+  orders: process.env.MONGODB_URI?.replace(/\/[^/]*(\?|$)/, `/ecommerce_orders$1`) || 'mongodb://localhost:27017/ecommerce_orders',
+};
 
 // Sample data
+const categories = [
+  { name: 'Electronics', slug: 'electronics', description: 'Latest electronic devices and gadgets', order: 1 },
+  { name: 'Clothing', slug: 'clothing', description: 'Fashion and apparel for all', order: 2 },
+  { name: 'Books', slug: 'books', description: 'Wide collection of books', order: 3 },
+  { name: 'Home & Garden', slug: 'home-garden', description: 'Everything for your home', order: 4 },
+  { name: 'Sports', slug: 'sports', description: 'Sports equipment and accessories', order: 5 },
+];
+
+const products = [
+  {
+    name: 'Wireless Headphones Pro',
+    slug: 'wireless-headphones-pro',
+    description: 'Premium wireless headphones with active noise cancellation and 30-hour battery life.',
+    shortDescription: 'Premium wireless headphones with ANC',
+    sku: 'WHP-001',
+    price: 199.99,
+    compareAtPrice: 249.99,
+    category: 'Electronics',
+    brand: 'AudioTech',
+    tags: ['wireless', 'headphones', 'audio', 'premium'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e', alt: 'Headphones front view', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 50, trackInventory: true, lowStockThreshold: 10 },
+    specifications: { Color: 'Black', Weight: '250g', Battery: '30 hours' },
+    isFeatured: true,
+  },
+  {
+    name: 'Smart Watch Series 5',
+    slug: 'smart-watch-series-5',
+    description: 'Advanced smartwatch with health tracking, GPS, and water resistance.',
+    shortDescription: 'Advanced smartwatch with health tracking',
+    sku: 'SW-005',
+    price: 299.99,
+    category: 'Electronics',
+    brand: 'TechWear',
+    tags: ['smartwatch', 'fitness', 'health'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30', alt: 'Smart watch', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 30, trackInventory: true },
+    isFeatured: true,
+  },
+  {
+    name: 'Classic Denim Jacket',
+    slug: 'classic-denim-jacket',
+    description: 'Timeless denim jacket made from premium quality fabric.',
+    sku: 'CDJ-001',
+    price: 79.99,
+    category: 'Clothing',
+    tags: ['denim', 'jacket', 'casual'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5', alt: 'Denim jacket', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 100, trackInventory: true },
+  },
+  {
+    name: 'Running Shoes Ultra',
+    slug: 'running-shoes-ultra',
+    description: 'Lightweight running shoes with superior cushioning and breathability.',
+    sku: 'RSU-001',
+    price: 89.99,
+    category: 'Sports',
+    brand: 'RunFast',
+    tags: ['running', 'shoes', 'sports'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff', alt: 'Running shoes', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 75, trackInventory: true },
+    isFeatured: true,
+  },
+  {
+    name: 'Mystery Novel Collection',
+    slug: 'mystery-novel-collection',
+    description: 'Collection of bestselling mystery novels from renowned authors.',
+    sku: 'MNC-001',
+    price: 34.99,
+    category: 'Books',
+    tags: ['books', 'mystery', 'fiction'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e', alt: 'Books', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 150, trackInventory: true },
+  },
+  {
+    name: 'Indoor Plant Set',
+    slug: 'indoor-plant-set',
+    description: 'Beautiful set of low-maintenance indoor plants perfect for home decoration.',
+    sku: 'IPS-001',
+    price: 49.99,
+    category: 'Home & Garden',
+    tags: ['plants', 'home', 'decoration'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411', alt: 'Indoor plants', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 40, trackInventory: true },
+  },
+  {
+    name: 'Yoga Mat Premium',
+    slug: 'yoga-mat-premium',
+    description: 'Extra thick, non-slip yoga mat with carrying strap.',
+    sku: 'YMP-001',
+    price: 39.99,
+    category: 'Sports',
+    tags: ['yoga', 'fitness', 'exercise'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f', alt: 'Yoga mat', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 60, trackInventory: true },
+  },
+  {
+    name: 'Laptop Backpack Pro',
+    slug: 'laptop-backpack-pro',
+    description: 'Durable laptop backpack with multiple compartments and USB charging port.',
+    sku: 'LBP-001',
+    price: 59.99,
+    category: 'Electronics',
+    tags: ['backpack', 'laptop', 'travel'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62', alt: 'Laptop backpack', isPrimary: true, order: 0 }
+    ],
+    inventory: { quantity: 80, trackInventory: true },
+  },
+];
+
 const users = [
   {
     email: 'admin@ecommerce.com',
@@ -18,279 +156,133 @@ const users = [
     firstName: 'Admin',
     lastName: 'User',
     role: 'admin',
-    isActive: true,
-    isVerified: true,
+    isEmailVerified: true,
   },
   {
-    email: 'vendor@ecommerce.com',
-    password: 'Vendor@123',
-    firstName: 'John',
-    lastName: 'Vendor',
-    role: 'vendor',
-    isActive: true,
-    isVerified: true,
-  },
-  {
-    email: 'customer@ecommerce.com',
+    email: 'customer@example.com',
     password: 'Customer@123',
-    firstName: 'Jane',
-    lastName: 'Customer',
+    firstName: 'John',
+    lastName: 'Doe',
     role: 'customer',
-    isActive: true,
-    isVerified: true,
-    addresses: [
-      {
-        type: 'home',
-        street: '123 Main Street',
-        city: 'New York',
-        state: 'NY',
-        country: 'USA',
-        zipCode: '10001',
-        isDefault: true,
-      },
-    ],
-  },
-];
-
-const categories = [
-  { name: 'Electronics', slug: 'electronics', description: 'Electronic devices and gadgets', order: 1 },
-  { name: 'Clothing', slug: 'clothing', description: 'Fashion and apparel', order: 2 },
-  { name: 'Home & Garden', slug: 'home-garden', description: 'Home improvement and gardening', order: 3 },
-  { name: 'Sports', slug: 'sports', description: 'Sports equipment and accessories', order: 4 },
-  { name: 'Books', slug: 'books', description: 'Books and publications', order: 5 },
-];
-
-const products = [
-  {
-    name: 'Wireless Bluetooth Headphones',
-    slug: 'wireless-bluetooth-headphones',
-    description: 'Premium wireless headphones with active noise cancellation and 30-hour battery life.',
-    shortDescription: 'Premium ANC headphones',
-    sku: 'WBH-001',
-    price: 149.99,
-    compareAtPrice: 199.99,
-    category: 'electronics',
-    brand: 'TechSound',
-    tags: ['headphones', 'wireless', 'bluetooth', 'audio'],
-    images: [
-      { url: 'https://via.placeholder.com/400x400?text=Headphones', alt: 'Wireless Headphones', isPrimary: true, order: 0 },
-    ],
-    inventory: { quantity: 100, lowStockThreshold: 10, trackInventory: true },
-    ratings: { average: 4.5, count: 128 },
-    isFeatured: true,
-  },
-  {
-    name: 'Smart Watch Pro',
-    slug: 'smart-watch-pro',
-    description: 'Advanced smartwatch with health monitoring, GPS, and 7-day battery life.',
-    shortDescription: 'Advanced health smartwatch',
-    sku: 'SWP-002',
-    price: 299.99,
-    category: 'electronics',
-    brand: 'TechWear',
-    tags: ['smartwatch', 'fitness', 'health', 'wearable'],
-    images: [
-      { url: 'https://via.placeholder.com/400x400?text=SmartWatch', alt: 'Smart Watch Pro', isPrimary: true, order: 0 },
-    ],
-    inventory: { quantity: 50, lowStockThreshold: 5, trackInventory: true },
-    ratings: { average: 4.8, count: 256 },
-    isFeatured: true,
-  },
-  {
-    name: 'Men\'s Classic Cotton T-Shirt',
-    slug: 'mens-classic-cotton-tshirt',
-    description: 'Comfortable 100% cotton t-shirt in classic fit. Available in multiple colors.',
-    shortDescription: 'Classic fit cotton tee',
-    sku: 'MCT-003',
-    price: 24.99,
-    compareAtPrice: 34.99,
-    category: 'clothing',
-    brand: 'ComfortWear',
-    tags: ['tshirt', 'cotton', 'mens', 'casual'],
-    images: [
-      { url: 'https://via.placeholder.com/400x400?text=TShirt', alt: 'Classic T-Shirt', isPrimary: true, order: 0 },
-    ],
-    variants: [
-      { name: 'Small - Black', sku: 'MCT-003-S-BLK', price: 24.99, inventory: 20, attributes: { size: 'S', color: 'Black' } },
-      { name: 'Medium - Black', sku: 'MCT-003-M-BLK', price: 24.99, inventory: 30, attributes: { size: 'M', color: 'Black' } },
-      { name: 'Large - Black', sku: 'MCT-003-L-BLK', price: 24.99, inventory: 25, attributes: { size: 'L', color: 'Black' } },
-    ],
-    inventory: { quantity: 200, lowStockThreshold: 20, trackInventory: true },
-    ratings: { average: 4.2, count: 89 },
-  },
-  {
-    name: 'Yoga Mat Premium',
-    slug: 'yoga-mat-premium',
-    description: 'Eco-friendly yoga mat with excellent grip and cushioning. 6mm thick.',
-    shortDescription: 'Eco-friendly yoga mat',
-    sku: 'YMP-004',
-    price: 49.99,
-    category: 'sports',
-    brand: 'ZenFit',
-    tags: ['yoga', 'fitness', 'eco-friendly', 'exercise'],
-    images: [
-      { url: 'https://via.placeholder.com/400x400?text=YogaMat', alt: 'Yoga Mat Premium', isPrimary: true, order: 0 },
-    ],
-    inventory: { quantity: 75, lowStockThreshold: 10, trackInventory: true },
-    ratings: { average: 4.6, count: 167 },
-    isFeatured: true,
-  },
-  {
-    name: 'Bestseller Mystery Novel',
-    slug: 'bestseller-mystery-novel',
-    description: 'The latest thriller from a bestselling author. A gripping tale of mystery and suspense.',
-    shortDescription: 'Gripping mystery thriller',
-    sku: 'BMN-005',
-    price: 14.99,
-    compareAtPrice: 19.99,
-    category: 'books',
-    brand: 'Reader\'s Choice',
-    tags: ['book', 'mystery', 'thriller', 'fiction'],
-    images: [
-      { url: 'https://via.placeholder.com/400x400?text=Book', alt: 'Mystery Novel', isPrimary: true, order: 0 },
-    ],
-    inventory: { quantity: 150, lowStockThreshold: 15, trackInventory: true },
-    ratings: { average: 4.4, count: 312 },
-  },
-];
-
-const coupons = [
-  {
-    code: 'WELCOME10',
-    description: '10% off your first order',
-    discountType: 'percentage',
-    discountValue: 10,
-    minOrderAmount: 50,
-    maxDiscountAmount: 20,
-    usageLimit: 1000,
-    perUserLimit: 1,
-    validFrom: new Date(),
-    validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-    isActive: true,
-  },
-  {
-    code: 'SAVE20',
-    description: '$20 off orders over $100',
-    discountType: 'fixed',
-    discountValue: 20,
-    minOrderAmount: 100,
-    usageLimit: 500,
-    perUserLimit: 3,
-    validFrom: new Date(),
-    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    isActive: true,
-  },
-  {
-    code: 'FREESHIP',
-    description: 'Free shipping on orders over $50',
-    discountType: 'fixed',
-    discountValue: 5.99,
-    minOrderAmount: 50,
-    validFrom: new Date(),
-    validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
-    isActive: true,
+    isEmailVerified: true,
   },
 ];
 
 async function seedDatabase() {
   try {
-    console.log('Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB');
+    console.log('🌱 Starting database seeding...\n');
 
-    // Get database
-    const db = mongoose.connection.db;
+    // Seed Products Database
+    console.log('📦 Seeding Products Database...');
+    const productsConn = await mongoose.createConnection(dbConfigs.products).asPromise();
+
+    const CategorySchema = new mongoose.Schema({
+      name: String,
+      slug: String,
+      description: String,
+      isActive: { type: Boolean, default: true },
+      order: Number,
+      productCount: { type: Number, default: 0 },
+    }, { timestamps: true });
+
+    const ProductSchema = new mongoose.Schema({
+      name: String,
+      slug: String,
+      description: String,
+      shortDescription: String,
+      sku: String,
+      price: Number,
+      compareAtPrice: Number,
+      costPrice: Number,
+      category: String,
+      subcategory: String,
+      brand: String,
+      tags: [String],
+      images: [{
+        url: String,
+        alt: String,
+        isPrimary: Boolean,
+        order: Number,
+      }],
+      inventory: {
+        quantity: Number,
+        reservedQuantity: { type: Number, default: 0 },
+        lowStockThreshold: { type: Number, default: 10 },
+        trackInventory: { type: Boolean, default: true },
+        allowBackorder: { type: Boolean, default: false },
+      },
+      specifications: mongoose.Schema.Types.Mixed,
+      ratings: {
+        average: { type: Number, default: 0 },
+        count: { type: Number, default: 0 },
+      },
+      isActive: { type: Boolean, default: true },
+      isFeatured: { type: Boolean, default: false },
+    }, { timestamps: true });
+
+    const Category = productsConn.model('Category', CategorySchema);
+    const Product = productsConn.model('Product', ProductSchema);
 
     // Clear existing data
-    console.log('\nClearing existing data...');
-    await db.collection('users').deleteMany({});
-    await db.collection('categories').deleteMany({});
-    await db.collection('products').deleteMany({});
-    await db.collection('carts').deleteMany({});
-    await db.collection('coupons').deleteMany({});
-    await db.collection('orders').deleteMany({});
-    await db.collection('sessions').deleteMany({});
-    await db.collection('reviews').deleteMany({});
+    await Category.deleteMany({});
+    await Product.deleteMany({});
 
-    // Seed users
-    console.log('Seeding users...');
-    const hashedUsers = await Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        password: await bcrypt.hash(user.password, 12),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }))
-    );
-    await db.collection('users').insertMany(hashedUsers);
-    console.log(`  ✓ Created ${users.length} users`);
+    // Insert categories
+    const insertedCategories = await Category.insertMany(categories);
+    console.log(`✅ Inserted ${insertedCategories.length} categories`);
 
-    // Seed categories
-    console.log('Seeding categories...');
-    const categoriesWithTimestamps = categories.map((cat) => ({
-      ...cat,
-      isActive: true,
-      productCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-    await db.collection('categories').insertMany(categoriesWithTimestamps);
-    console.log(`  ✓ Created ${categories.length} categories`);
+    // Insert products
+    const insertedProducts = await Product.insertMany(products);
+    console.log(`✅ Inserted ${insertedProducts.length} products`);
 
-    // Seed products
-    console.log('Seeding products...');
-    const productsWithTimestamps = products.map((product) => ({
-      ...product,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-    await db.collection('products').insertMany(productsWithTimestamps);
-    console.log(`  ✓ Created ${products.length} products`);
+    await productsConn.close();
 
-    // Update category product counts
-    for (const cat of categories) {
-      const count = products.filter((p) => p.category === cat.slug).length;
-      await db.collection('categories').updateOne(
-        { slug: cat.slug },
-        { $set: { productCount: count } }
-      );
+    // Seed Users Database
+    console.log('\n👥 Seeding Users Database...');
+    const usersConn = await mongoose.createConnection(dbConfigs.users).asPromise();
+
+    const UserSchema = new mongoose.Schema({
+      email: { type: String, required: true, unique: true },
+      password: { type: String, required: true },
+      firstName: String,
+      lastName: String,
+      phone: String,
+      role: { type: String, enum: ['customer', 'admin', 'vendor'], default: 'customer' },
+      isEmailVerified: { type: Boolean, default: false },
+      isActive: { type: Boolean, default: true },
+      addresses: [{ type: mongoose.Schema.Types.Mixed }],
+    }, { timestamps: true });
+
+    const User = usersConn.model('User', UserSchema);
+
+    // Clear existing users
+    await User.deleteMany({});
+
+    // Hash passwords and insert users
+    for (const user of users) {
+      user.password = await bcrypt.hash(user.password, 10);
     }
 
-    // Seed coupons
-    console.log('Seeding coupons...');
-    const couponsWithTimestamps = coupons.map((coupon) => ({
-      ...coupon,
-      usedCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-    await db.collection('coupons').insertMany(couponsWithTimestamps);
-    console.log(`  ✓ Created ${coupons.length} coupons`);
+    const insertedUsers = await User.insertMany(users);
+    console.log(`✅ Inserted ${insertedUsers.length} users`);
 
-    // Create indexes
-    console.log('\nCreating indexes...');
-    await db.collection('users').createIndex({ email: 1 }, { unique: true });
-    await db.collection('products').createIndex({ slug: 1 }, { unique: true });
-    await db.collection('products').createIndex({ sku: 1 }, { unique: true });
-    await db.collection('products').createIndex({ name: 'text', description: 'text', tags: 'text' });
-    await db.collection('categories').createIndex({ slug: 1 }, { unique: true });
-    await db.collection('coupons').createIndex({ code: 1 }, { unique: true });
-    console.log('  ✓ Indexes created');
+    await usersConn.close();
 
-    console.log('\n✅ Database seeded successfully!');
-    console.log('\n📋 Test Credentials:');
-    console.log('  Admin:    admin@ecommerce.com / Admin@123');
-    console.log('  Vendor:   vendor@ecommerce.com / Vendor@123');
-    console.log('  Customer: customer@ecommerce.com / Customer@123');
-    console.log('\n🎟️  Test Coupons: WELCOME10, SAVE20, FREESHIP\n');
+    console.log('\n✅ Database seeding completed successfully!');
+    console.log('\n📝 Login Credentials:');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('Admin:');
+    console.log('  Email: admin@ecommerce.com');
+    console.log('  Password: Admin@123');
+    console.log('\nCustomer:');
+    console.log('  Email: customer@example.com');
+    console.log('  Password: Customer@123');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
+    process.exit(0);
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('❌ Error seeding database:', error);
     process.exit(1);
-  } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
   }
 }
 
