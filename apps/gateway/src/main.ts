@@ -163,13 +163,6 @@ app.use(
   }))
 );
 
-app.use(
-  '/api/users',
-  createProxyMiddleware(createProxyOptions(SERVICES.USER_SERVICE, {
-    '^/api/users': '/users',
-  }))
-);
-
 // Product Service - Products & Categories
 app.use(
   '/api/products',
@@ -244,21 +237,38 @@ app.get('/api', (req, res) => {
           'POST /api/auth/login - Login user',
           'POST /api/auth/refresh - Refresh tokens',
           'POST /api/auth/logout - Logout user',
+          'POST /api/auth/logout-all - Logout from all devices',
           'GET /api/auth/profile - Get user profile',
           'PUT /api/auth/profile - Update profile',
+          'PUT /api/auth/password - Change password',
+          'POST /api/auth/addresses - Add address',
+          'PUT /api/auth/addresses/:addressId - Update address',
+          'DELETE /api/auth/addresses/:addressId - Delete address',
+          'GET /api/auth/users - Get all users (admin)',
+          'PUT /api/auth/users/:userId/role - Update user role (admin)',
+          'PUT /api/auth/users/:userId/toggle-status - Toggle user status (admin)',
         ],
       },
       products: {
         base: '/api/products',
         routes: [
           'GET /api/products - List products',
-          'GET /api/products/:id - Get product',
-          'GET /api/products/slug/:slug - Get by slug',
           'GET /api/products/featured - Featured products',
           'GET /api/products/search?q= - Search products',
+          'GET /api/products/low-stock - Low stock products (admin)',
+          'GET /api/products/by-category - Product count by category',
+          'GET /api/products/slug/:slug - Get by slug',
+          'GET /api/products/:id - Get product',
+          'GET /api/products/:id/related - Get related products',
+          'GET /api/products/:id/reviews - Get product reviews',
           'POST /api/products - Create product (admin)',
+          'POST /api/products/:id/reviews - Create review',
           'PUT /api/products/:id - Update product (admin)',
+          'PUT /api/products/:id/inventory - Update inventory (admin)',
+          'PUT /api/products/:productId/reviews/:reviewId - Update review',
           'DELETE /api/products/:id - Delete product (admin)',
+          'DELETE /api/products/:productId/reviews/:reviewId - Delete review',
+          'POST /api/products/:productId/reviews/:reviewId/helpful - Mark review helpful',
         ],
       },
       categories: {
@@ -266,9 +276,12 @@ app.get('/api', (req, res) => {
         routes: [
           'GET /api/categories - List categories',
           'GET /api/categories/tree - Category tree',
+          'GET /api/categories/slug/:slug - Get by slug',
           'GET /api/categories/:id - Get category',
+          'GET /api/categories/:id/subcategories - Get subcategories',
           'POST /api/categories - Create (admin)',
           'PUT /api/categories/:id - Update (admin)',
+          'PUT /api/categories/reorder - Reorder categories (admin)',
           'DELETE /api/categories/:id - Delete (admin)',
         ],
       },
@@ -276,12 +289,14 @@ app.get('/api', (req, res) => {
         base: '/api/cart',
         routes: [
           'GET /api/cart - Get cart',
+          'GET /api/cart/summary - Get cart summary',
           'POST /api/cart/items - Add item',
           'PUT /api/cart/items/:itemId - Update quantity',
           'DELETE /api/cart/items/:itemId - Remove item',
           'DELETE /api/cart/clear - Clear cart',
           'POST /api/cart/coupon - Apply coupon',
           'DELETE /api/cart/coupon - Remove coupon',
+          'POST /api/cart/merge - Merge guest cart with user cart',
         ],
       },
       orders: {
@@ -289,10 +304,17 @@ app.get('/api', (req, res) => {
         routes: [
           'POST /api/orders/checkout - Create order',
           'GET /api/orders/my-orders - User orders',
-          'GET /api/orders/:id - Get order',
-          'PUT /api/orders/:id/cancel - Cancel order',
+          'GET /api/orders/statistics - Order statistics (admin)',
+          'GET /api/orders/recent - Recent orders (admin)',
+          'GET /api/orders/sales - Sales by date (admin)',
+          'GET /api/orders/top-products - Top selling products (admin)',
           'GET /api/orders - All orders (admin)',
+          'GET /api/orders/number/:orderNumber - Get by order number',
+          'GET /api/orders/:id - Get order',
           'PUT /api/orders/:id/status - Update status (admin)',
+          'PUT /api/orders/:id/cancel - Cancel order',
+          'PUT /api/orders/:id/payment - Update payment status (admin)',
+          'PUT /api/orders/:id/tracking - Add tracking number (admin)',
         ],
       },
       analytics: {
