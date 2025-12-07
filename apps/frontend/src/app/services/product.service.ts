@@ -101,7 +101,7 @@ export class ProductService {
     getProducts(filters: ProductFilter = {}): Observable<{ products: Product[]; total: number; page: number; totalPages: number }> {
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
+            if (value !== undefined && value !== null && value !== '') {
                 params.append(key, value.toString());
             }
         });

@@ -452,6 +452,9 @@ export class ProductsComponent implements OnInit {
                 this.products = data.products;
                 this.currentPage = data.page;
                 this.totalPages = data.totalPages;
+            },
+            error: () => {
+                this.productService.loading.set(false);
             }
         });
     }

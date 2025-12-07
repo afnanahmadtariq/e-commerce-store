@@ -96,12 +96,12 @@ export const updateProductSchema = Joi.object({
 });
 
 export const productFilterSchema = Joi.object({
-  category: Joi.string().optional(),
-  subcategory: Joi.string().optional(),
-  brand: Joi.string().optional(),
+  category: Joi.string().optional().allow(''),
+  subcategory: Joi.string().optional().allow(''),
+  brand: Joi.string().optional().allow(''),
   minPrice: Joi.number().min(0).optional(),
   maxPrice: Joi.number().min(0).optional(),
-  search: Joi.string().optional(),
+  search: Joi.string().optional().allow(''),
   sortBy: Joi.string().valid('price', 'name', 'createdAt', 'ratings').optional(),
   sortOrder: Joi.string().valid('asc', 'desc').optional(),
   page: Joi.number().min(1).default(1),
