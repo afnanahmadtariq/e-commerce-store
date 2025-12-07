@@ -10,7 +10,11 @@ dotenv.config();
 
 const host = process.env['HOST'] ?? 'localhost';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3004;
-const mongoUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017/ecommerce_orders';
+const dbName = process.env['DB_NAME'] || 'ecommerce_orders';
+const baseUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017';
+const mongoUri = baseUri.includes('mongodb+srv')
+  ? `${baseUri.replace(/\/[^/]*(\?|$)/, `/${dbName}$1`)}`
+  : `${baseUri}/${dbName}`;
 
 const app = express();
 
@@ -61,6 +65,7 @@ app.get('/health', (req, res) => {
 app.use('/orders', orderRoutes);
 
 // Error handler
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(500).json({

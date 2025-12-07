@@ -11,7 +11,11 @@ dotenv.config();
 
 const host = process.env['HOST'] ?? 'localhost';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3002;
-const mongoUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017/ecommerce_products';
+const dbName = process.env['DB_NAME'] || 'ecommerce_products';
+const baseUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017';
+const mongoUri = baseUri.includes('mongodb+srv')
+  ? `${baseUri.replace(/\/[^/]*(\?|$)/, `/${dbName}$1`)}`
+  : `${baseUri}/${dbName}`;
 
 const app = express();
 
@@ -40,8 +44,8 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     service: 'product-service',
     status: 'healthy',
     timestamp: new Date().toISOString(),

@@ -4,6 +4,7 @@ export interface ICartDocument extends Document {
   userId?: mongoose.Types.ObjectId;
   sessionId?: string;
   items: Array<{
+    _id?: mongoose.Types.ObjectId;
     productId: mongoose.Types.ObjectId;
     variantId?: string;
     name: string;

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
   | 'confirmed'
   | 'processing'
@@ -11,7 +11,7 @@ export type OrderStatus =
   | 'refunded'
   | 'failed';
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | 'pending'
   | 'authorized'
   | 'captured'
@@ -19,7 +19,7 @@ export type PaymentStatus =
   | 'refunded'
   | 'partially_refunded';
 
-export type PaymentMethod = 
+export type PaymentMethod =
   | 'credit_card'
   | 'debit_card'
   | 'paypal'
@@ -214,13 +214,12 @@ OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ 'payment.status': 1 });
 
 // Generate order number before saving
-OrderSchema.pre('save', async function(next) {
+OrderSchema.pre('save', async function () {
   if (this.isNew && !this.orderNumber) {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.orderNumber = `ORD-${timestamp}-${random}`;
   }
-  next();
 });
 
 export const Order = mongoose.model<IOrderDocument>('Order', OrderSchema);

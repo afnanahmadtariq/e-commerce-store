@@ -109,19 +109,12 @@ UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1, isVerified: 1 });
 
 // Hash password before saving
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        next();
         return;
     }
-
-    try {
-        const salt = await bcrypt.genSalt(12);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (err) {
-        next(err as Error);
-    }
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Compare password method

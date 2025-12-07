@@ -6,7 +6,7 @@ const router = Router();
 // Helper to get cart identifier from request
 const getCartIdentifier = (req: Request) => ({
   userId: req.headers['x-user-id'] as string | undefined,
-  sessionId: req.headers['x-session-id'] as string || req.sessionID,
+  sessionId: req.headers['x-session-id'] as string || '',
 });
 
 /**

@@ -1,4 +1,4 @@
-import { Server as SocketServer, Socket } from 'socket.io';
+import { Server as SocketServer } from 'socket.io';
 import { Cart, ICartDocument } from '../models/cart.model';
 import { Coupon } from '../models/coupon.model';
 
@@ -87,7 +87,7 @@ export class CartService {
 
     // Check if item already exists in cart
     const existingItemIndex = cart.items.findIndex(
-      (item) => 
+      (item) =>
         item.productId.toString() === itemData.productId &&
         item.variantId === itemData.variantId
     );
@@ -95,7 +95,7 @@ export class CartService {
     if (existingItemIndex > -1) {
       // Update quantity
       const newQuantity = cart.items[existingItemIndex].quantity + itemData.quantity;
-      
+
       if (newQuantity > itemData.maxQuantity) {
         throw new Error(`Only ${itemData.maxQuantity} items available in stock`);
       }
@@ -304,7 +304,7 @@ export class CartService {
       } else {
         cart.discount = cart.coupon.discountValue;
       }
-      
+
       // Validate and update coupon
       const coupon = await Coupon.findOne({ code: cart.coupon.code, isActive: true });
       if (!coupon || (coupon.minOrderAmount && cart.subtotal < coupon.minOrderAmount)) {
@@ -373,7 +373,7 @@ export class CartService {
 
   // Merge guest cart with user cart after login
   static async mergeCarts(
-    sessionId: string, 
+    sessionId: string,
     userId: string
   ): Promise<ICartDocument | null> {
     const guestCart = await Cart.findOne({ sessionId });
@@ -395,7 +395,7 @@ export class CartService {
     if (guestCart && userCart) {
       for (const guestItem of guestCart.items) {
         const existingItemIndex = userCart.items.findIndex(
-          (item) => 
+          (item) =>
             item.productId.toString() === guestItem.productId.toString() &&
             item.variantId === guestItem.variantId
         );
@@ -407,7 +407,7 @@ export class CartService {
             guestItem.maxQuantity
           );
           userCart.items[existingItemIndex].quantity = newQuantity;
-          userCart.items[existingItemIndex].subtotal = 
+          userCart.items[existingItemIndex].subtotal =
             userCart.items[existingItemIndex].price * newQuantity;
         } else {
           // Add item to user cart
@@ -429,7 +429,7 @@ export class CartService {
 
   // Update prices in cart (called when product prices change)
   static async updateCartPrices(
-    productId: string, 
+    productId: string,
     newPrice: number
   ): Promise<void> {
     const carts = await Cart.find({

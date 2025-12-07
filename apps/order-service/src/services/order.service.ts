@@ -25,8 +25,8 @@ export interface CreateOrderData {
 
 export interface OrderFilter {
     userId?: string;
-    status?: OrderStatus;
-    paymentStatus?: PaymentStatus;
+    status?: OrderStatus | string;
+    paymentStatus?: PaymentStatus | string;
     startDate?: Date;
     endDate?: Date;
     minTotal?: number;
@@ -62,7 +62,7 @@ export class OrderService {
         // Calculate total
         const total = data.subtotal - (data.discount || 0) + data.tax + data.shipping;
 
-        const order = await Order.create({
+        const orderData = {
             userId: data.userId,
             items,
             shippingAddress: data.shippingAddress,
@@ -85,7 +85,10 @@ export class OrderService {
                 note: 'Order placed',
             }],
             notes: data.notes,
-        });
+        };
+
+        const order = new Order(orderData);
+        await order.save();
 
         // TODO: Emit order.created event for inventory reservation
         console.log(`Order created: ${order.orderNumber}`);

@@ -1,32 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database
-  mongodb:
-    image: mongo:7.0
-    container_name: ecommerce-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_DATABASE=ecommerce
-    networks:
-      - ecommerce-network
-
-  # Redis Cache (Optional)
-  redis:
-    image: redis:7-alpine
-    container_name: ecommerce-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - ecommerce-network
-
   # API Gateway
   gateway:
     build:
@@ -44,7 +18,7 @@ services:
       - PRODUCT_SERVICE_URL=http://product-service:3002
       - CART_SERVICE_URL=http://cart-service:3003
       - ORDER_SERVICE_URL=http://order-service:3004
-      - CORS_ORIGIN=http://localhost:4200
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:4200}
     depends_on:
       - user-service
       - product-service
@@ -66,11 +40,18 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - MONGODB_URI=mongodb://mongodb:27017/ecommerce_users
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret-key}
-    depends_on:
-      - mongodb
+      - MONGODB_URI=${MONGODB_URI}
+      - DB_NAME=${USER_DB_NAME:-ecommerce_users}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:4200}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:4200}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM:-noreply@ecommerce.com}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-E-Commerce Store}
     networks:
       - ecommerce-network
 
@@ -87,9 +68,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
-      - MONGODB_URI=mongodb://mongodb:27017/ecommerce_products
-    depends_on:
-      - mongodb
+      - MONGODB_URI=${MONGODB_URI}
+      - DB_NAME=${PRODUCT_DB_NAME:-ecommerce_products}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:4200}
     networks:
       - ecommerce-network
 
@@ -106,9 +87,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3003
-      - MONGODB_URI=mongodb://mongodb:27017/ecommerce_carts
-    depends_on:
-      - mongodb
+      - MONGODB_URI=${MONGODB_URI}
+      - DB_NAME=${CART_DB_NAME:-ecommerce_carts}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:4200}
     networks:
       - ecommerce-network
 
@@ -125,9 +106,43 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3004
-      - MONGODB_URI=mongodb://mongodb:27017/ecommerce_orders
+      - MONGODB_URI=${MONGODB_URI}
+      - DB_NAME=${ORDER_DB_NAME:-ecommerce_orders}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:4200}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM:-noreply@ecommerce.com}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-E-Commerce Store}
+    networks:
+      - ecommerce-network
+
+  # Frontend (Angular)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ecommerce-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    environment:
+      - API_URL=http://localhost:3000/api
     depends_on:
-      - mongodb
+      - gateway
+    networks:
+      - ecommerce-network
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - ecommerce-network
 
@@ -141,9 +156,9 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - gateway
+      - frontend
     networks:
       - ecommerce-network
 
@@ -152,5 +167,4 @@ networks:
     driver: bridge
 
 volumes:
-  mongodb_data:
   redis_data:

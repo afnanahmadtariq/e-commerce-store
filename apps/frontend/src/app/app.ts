@@ -1,13 +1,32 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import { HeaderComponent } from './components/layout/header.component';
+import { FooterComponent } from './components/layout/footer.component';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
+  imports: [RouterModule, HeaderComponent, FooterComponent],
   selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css',
+  template: `
+    <div class="app-wrapper">
+      <app-header />
+      <main class="main-content">
+        <router-outlet />
+      </main>
+      <app-footer />
+    </div>
+  `,
+  styles: [`
+    .app-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+    }
+  `]
 })
 export class App {
-  protected title = 'frontend';
+  protected title = 'ShopVerse';
 }
