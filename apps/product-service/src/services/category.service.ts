@@ -37,11 +37,14 @@ export class CategoryService {
   }
 
   // Get category tree (hierarchical structure)
-  static async getCategoryTree(): Promise<Array<ICategoryDocument & { children: ICategoryDocument[] }>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static async getCategoryTree(): Promise<any[]> {
     const categories = await Category.find({ isActive: true }).sort({ order: 1, name: 1 });
-    
-    const categoryMap = new Map<string, ICategoryDocument & { children: ICategoryDocument[] }>();
-    const rootCategories: Array<ICategoryDocument & { children: ICategoryDocument[] }> = [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const categoryMap = new Map<string, any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rootCategories: any[] = [];
 
     // First pass: create map
     categories.forEach((cat) => {
@@ -50,13 +53,13 @@ export class CategoryService {
 
     // Second pass: build tree
     categories.forEach((cat) => {
-      const categoryWithChildren = categoryMap.get(cat._id.toString())!;
-      if (cat.parentId) {
+      const categoryWithChildren = categoryMap.get(cat._id.toString());
+      if (categoryWithChildren && cat.parentId) {
         const parent = categoryMap.get(cat.parentId.toString());
         if (parent) {
           parent.children.push(categoryWithChildren);
         }
-      } else {
+      } else if (categoryWithChildren) {
         rootCategories.push(categoryWithChildren);
       }
     });
@@ -76,7 +79,7 @@ export class CategoryService {
 
   // Update category
   static async update(
-    id: string, 
+    id: string,
     updates: Partial<CreateCategoryData>
   ): Promise<ICategoryDocument | null> {
     if (updates.name) {
@@ -134,10 +137,10 @@ export class CategoryService {
     const bulkOps = orderedIds.map((id, index) => ({
       updateOne: {
         filter: { _id: id },
-        update: { order: index },
+        update: { $set: { order: index } },
       },
     }));
 
-    await Category.bulkWrite(bulkOps);
+    await Category.bulkWrite(bulkOps as unknown as Parameters<typeof Category.bulkWrite>[0]);
   }
 }
