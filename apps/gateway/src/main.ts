@@ -159,7 +159,7 @@ const createProxyOptions = (target: string, pathRewrite?: Record<string, string>
 app.use(
   '/api/auth',
   createProxyMiddleware(createProxyOptions(SERVICES.USER_SERVICE, {
-    '^/api/auth': '/auth',
+    '^/': '/auth/',
   }))
 );
 
@@ -167,14 +167,14 @@ app.use(
 app.use(
   '/api/products',
   createProxyMiddleware(createProxyOptions(SERVICES.PRODUCT_SERVICE, {
-    '^/api/products': '/products',
+    '^/': '/products/',
   }))
 );
 
 app.use(
   '/api/categories',
   createProxyMiddleware(createProxyOptions(SERVICES.PRODUCT_SERVICE, {
-    '^/api/categories': '/categories',
+    '^/': '/categories/',
   }))
 );
 
@@ -182,7 +182,7 @@ app.use(
 app.use(
   '/api/cart',
   createProxyMiddleware(createProxyOptions(SERVICES.CART_SERVICE, {
-    '^/api/cart': '/cart',
+    '^/': '/cart/',
   }))
 );
 
@@ -190,7 +190,7 @@ app.use(
 app.use(
   '/api/orders',
   createProxyMiddleware(createProxyOptions(SERVICES.ORDER_SERVICE, {
-    '^/api/orders': '/orders',
+    '^/': '/orders/',
   }))
 );
 

@@ -57,14 +57,13 @@ CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ isActive: 1, order: 1 });
 
 // Generate slug before saving
-CategorySchema.pre('save', function(next) {
+CategorySchema.pre('save', function() {
   if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  next();
 });
 
 export const Category = mongoose.model<ICategoryDocument>('Category', CategorySchema);
