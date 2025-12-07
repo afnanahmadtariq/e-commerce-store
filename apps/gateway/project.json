@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "gateway",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/backend/src",
+  "sourceRoot": "apps/gateway/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -11,12 +11,12 @@
       "defaultConfiguration": "production",
       "options": {
         "platform": "node",
-        "outputPath": "dist/apps/backend",
+        "outputPath": "dist/apps/gateway",
         "format": ["cjs"],
         "bundle": false,
-        "main": "apps/backend/src/main.ts",
-        "tsConfig": "apps/backend/tsconfig.app.json",
-        "assets": ["apps/backend/src/assets"],
+        "main": "apps/gateway/src/main.ts",
+        "tsConfig": "apps/gateway/tsconfig.app.json",
+        "assets": ["apps/gateway/src/assets"],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
@@ -42,8 +42,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/apps/backend/package.json",
-        "{workspaceRoot}/dist/apps/backend/package-lock.json"
+        "{workspaceRoot}/dist/apps/gateway/package.json",
+        "{workspaceRoot}/dist/apps/gateway/package-lock.json"
       ],
       "options": {
         "buildTarget": "build"
@@ -52,7 +52,7 @@
     "copy-workspace-modules": {
       "dependsOn": ["build"],
       "cache": true,
-      "outputs": ["{workspaceRoot}/dist/apps/backend/workspace_modules"],
+      "outputs": ["{workspaceRoot}/dist/apps/gateway/workspace_modules"],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
         "buildTarget": "build"
@@ -68,15 +68,15 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "backend:build",
+        "buildTarget": "gateway:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "backend:build:development"
+          "buildTarget": "gateway:build:development"
         },
         "production": {
-          "buildTarget": "backend:build:production"
+          "buildTarget": "gateway:build:production"
         }
       }
     }
