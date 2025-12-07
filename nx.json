@@ -24,6 +24,11 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.mjs"
       ]
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "generators": {
@@ -33,5 +38,13 @@
       "style": "css",
       "unitTestRunner": "none"
     }
-  }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ]
 }
