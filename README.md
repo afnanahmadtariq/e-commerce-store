@@ -1,84 +1,419 @@
-# E-Commerce Store
-Distributed E-Commerce Platform with Real-Time Services 
+# 🛒 E-Commerce Platform
 
+A distributed, scalable e-commerce platform built with **Node.js**, **Express**, **Angular**, **MongoDB**, and **Socket.IO**. Features a microservices architecture with real-time updates, JWT authentication, and Docker deployment.
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## 📋 Table of Contents
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+- [Architecture](#-architecture)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [API Documentation](#-api-documentation)
+- [Real-time Features](#-real-time-features)
+- [Deployment](#-deployment)
+- [Testing](#-testing)
+- [Contributing](#-contributing)
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## 🏗️ Architecture
 
-## Finish your CI setup
-
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/n2Icl6v9cu)
-
-
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx serve frontend
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           FRONTEND (Angular)                         │
+│   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
+│   │  Auth   │ │Products │ │  Cart   │ │ Orders  │ │  Admin  │       │
+│   └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘       │
+└────────┼───────────┼───────────┼───────────┼───────────┼────────────┘
+         │           │           │           │           │
+         └───────────┴───────────┼───────────┴───────────┘
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      API GATEWAY (Express + Socket.IO)               │
+│           JWT Validation │ Rate Limiting │ Request Routing           │
+└──────────────┬─────────────────┬─────────────────┬──────────────────┘
+               │                 │                 │
+       ┌───────┴───────┐ ┌───────┴───────┐ ┌───────┴───────┐
+       ▼               ▼ ▼               ▼ ▼               ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ User Service │ │Product Svc   │ │ Cart Service │ │ Order Service│
+│  Port: 3001  │ │ Port: 3002   │ │  Port: 3003  │ │  Port: 3004  │
+│  - Auth      │ │- CRUD        │ │- Real-time   │ │- Workflow    │
+│  - JWT/RBAC  │ │- Inventory   │ │- WebSocket   │ │- Lifecycle   │
+│  - Sessions  │ │- Images      │ │- Pricing     │ │- Analytics   │
+└──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+       │                │                │                │
+       └────────────────┴────────────────┴────────────────┘
+                                 ▼
+                        ┌───────────────┐
+                        │   MongoDB     │
+                        └───────────────┘
 ```
 
-To create a production bundle:
+## ✨ Features
 
-```sh
-npx nx build frontend
+### User Management
+
+- 🔐 JWT Authentication with refresh tokens
+- 👥 Role-Based Access Control (Admin, Vendor, Customer, Support)
+- 📝 Multi-step registration with email verification
+- 🏠 Address management (multiple addresses per user)
+- 🔒 Secure password hashing with bcrypt
+
+### Product & Inventory
+
+- 📦 Full CRUD operations for products
+- 🏷️ Category management with hierarchical structure
+- 📸 Image management (multiple images per product)
+- 📊 Inventory tracking with low-stock alerts
+- ⭐ Product reviews and ratings
+- 🔍 Full-text search with filtering and sorting
+
+### Shopping Cart
+
+- 🛒 Real-time cart updates via WebSocket
+- 💰 Intelligent price recalculation
+- 🎟️ Coupon/discount code support
+- 🔄 Cart merge on login (guest to user)
+- 📱 Session-based cart for guests
+
+### Order Processing
+
+- 📋 Complete order workflow management
+- 📦 Status tracking with history
+- 💳 Multiple payment methods support
+- 🚚 Shipping calculation
+- ❌ Order cancellation with inventory release
+
+### Admin Dashboard
+
+- 📊 Sales analytics and charts
+- 👥 User management
+- 📦 Inventory management
+- 🔔 Real-time notifications
+- 📈 System metrics
+
+## 🛠️ Tech Stack
+
+| Layer                | Technology                         |
+| -------------------- | ---------------------------------- |
+| **Frontend**         | Angular 20, RxJS, Socket.IO Client |
+| **API Gateway**      | Express.js, http-proxy-middleware  |
+| **Backend Services** | Node.js, Express.js, TypeScript    |
+| **Database**         | MongoDB with Mongoose ODM          |
+| **Real-time**        | Socket.IO                          |
+| **Authentication**   | JWT (JSON Web Tokens)              |
+| **Validation**       | Joi                                |
+| **Security**         | Helmet, CORS, Rate Limiting        |
+| **Monorepo**         | Nx Workspace                       |
+| **Deployment**       | Docker, Docker Compose, NGINX      |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- MongoDB 6.0+ (or MongoDB Atlas)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/yourusername/e-commerce-store.git
+   cd e-commerce-store
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Start MongoDB** (if running locally)
+
+   ```bash
+   # Using Docker
+   docker run -d -p 27017:27017 --name mongodb mongo:7.0
+   ```
+
+5. **Seed the database** (optional)
+
+   ```bash
+   npm run db:seed
+   ```
+
+6. **Start all services**
+
+   ```bash
+   # Start all backend services
+   npm start
+
+   # Or start individual services
+   npm run start:gateway        # Port 3000
+   npm run start:user-service   # Port 3001
+   npm run start:product-service # Port 3002
+   npm run start:cart-service   # Port 3003
+   npm run start:order-service  # Port 3004
+
+   # Start frontend
+   npm run start:frontend       # Port 4200
+   ```
+
+### Test Credentials (after seeding)
+
+| Role     | Email                  | Password     |
+| -------- | ---------------------- | ------------ |
+| Admin    | admin@ecommerce.com    | Admin@123    |
+| Vendor   | vendor@ecommerce.com   | Vendor@123   |
+| Customer | customer@ecommerce.com | Customer@123 |
+
+## 📁 Project Structure
+
+```
+e-commerce-store/
+├── apps/
+│   ├── frontend/              # Angular SPA
+│   │   └── src/
+│   │       ├── app/
+│   │       │   ├── components/
+│   │       │   ├── services/
+│   │       │   ├── guards/
+│   │       │   └── pages/
+│   │       └── assets/
+│   ├── gateway/               # API Gateway
+│   │   └── src/main.ts
+│   ├── user-service/          # Authentication & Users
+│   │   └── src/
+│   │       ├── models/
+│   │       ├── services/
+│   │       ├── routes/
+│   │       ├── middleware/
+│   │       └── validators/
+│   ├── product-service/       # Products & Categories
+│   │   └── src/
+│   │       ├── models/
+│   │       ├── services/
+│   │       ├── routes/
+│   │       └── validators/
+│   ├── cart-service/          # Shopping Cart (Real-time)
+│   │   └── src/
+│   │       ├── models/
+│   │       ├── services/
+│   │       ├── routes/
+│   │       └── socket/
+│   └── order-service/         # Order Processing
+│       └── src/
+│           ├── models/
+│           ├── services/
+│           └── routes/
+├── libs/
+│   └── shared/                # Shared types & constants
+│       └── src/
+│           └── lib/
+│               ├── types/
+│               └── constants/
+├── scripts/
+│   └── seed-database.js       # Database seeding
+├── docker-compose.yml         # Docker services
+├── Dockerfile                 # Multi-stage Docker build
+├── nginx.conf                 # NGINX configuration
+└── package.json
 ```
 
-To see all available targets to run for a project, run:
+## 📚 API Documentation
 
-```sh
-npx nx show project frontend
+### Base URL
+
+```
+http://localhost:3000/api
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Authentication Endpoints
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Method | Endpoint              | Description              |
+| ------ | --------------------- | ------------------------ |
+| POST   | `/api/auth/register`  | Register new user        |
+| POST   | `/api/auth/login`     | Login user               |
+| POST   | `/api/auth/refresh`   | Refresh access token     |
+| POST   | `/api/auth/logout`    | Logout user              |
+| GET    | `/api/auth/profile`   | Get current user profile |
+| PUT    | `/api/auth/profile`   | Update user profile      |
+| PUT    | `/api/auth/password`  | Change password          |
+| POST   | `/api/auth/addresses` | Add address              |
 
-## Add new projects
+### Product Endpoints
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+| Method | Endpoint                   | Description                  |
+| ------ | -------------------------- | ---------------------------- |
+| GET    | `/api/products`            | List products (with filters) |
+| GET    | `/api/products/:id`        | Get product by ID            |
+| GET    | `/api/products/slug/:slug` | Get product by slug          |
+| GET    | `/api/products/featured`   | Get featured products        |
+| GET    | `/api/products/search?q=`  | Search products              |
+| POST   | `/api/products`            | Create product (Admin)       |
+| PUT    | `/api/products/:id`        | Update product (Admin)       |
+| DELETE | `/api/products/:id`        | Delete product (Admin)       |
 
-Use the plugin's generator to create new projects.
+### Cart Endpoints
 
-To generate a new application, use:
+| Method | Endpoint                  | Description          |
+| ------ | ------------------------- | -------------------- |
+| GET    | `/api/cart`               | Get current cart     |
+| POST   | `/api/cart/items`         | Add item to cart     |
+| PUT    | `/api/cart/items/:itemId` | Update item quantity |
+| DELETE | `/api/cart/items/:itemId` | Remove item          |
+| DELETE | `/api/cart/clear`         | Clear cart           |
+| POST   | `/api/cart/coupon`        | Apply coupon         |
+| DELETE | `/api/cart/coupon`        | Remove coupon        |
 
-```sh
-npx nx g @nx/angular:app demo
+### Order Endpoints
+
+| Method | Endpoint                 | Description            |
+| ------ | ------------------------ | ---------------------- |
+| POST   | `/api/orders/checkout`   | Create order           |
+| GET    | `/api/orders/my-orders`  | Get user's orders      |
+| GET    | `/api/orders/:id`        | Get order by ID        |
+| PUT    | `/api/orders/:id/cancel` | Cancel order           |
+| GET    | `/api/orders`            | Get all orders (Admin) |
+| PUT    | `/api/orders/:id/status` | Update status (Admin)  |
+
+## 🔄 Real-time Features
+
+The platform uses Socket.IO for real-time updates:
+
+### Cart Events
+
+```javascript
+// Connect to WebSocket
+const socket = io('http://localhost:3000');
+
+// Join cart room
+socket.emit('cart:join', cartId);
+
+// Listen for updates
+socket.on('cart:updated', (data) => {
+  console.log('Cart updated:', data.cart);
+});
+
+socket.on('cart:item_added', (data) => {
+  console.log('Item added:', data.addedItem);
+});
+
+socket.on('cart:price_changed', (data) => {
+  console.log('Price changed for product:', data.productId);
+});
 ```
 
-To generate a new library, use:
+### Admin Dashboard Events
 
-```sh
-npx nx g @nx/angular:lib mylib
+```javascript
+socket.emit('admin:join');
+
+socket.on('analytics:new_order', (order) => {
+  // Update dashboard
+});
+
+socket.on('analytics:inventory_alert', (alert) => {
+  // Show low stock notification
+});
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## 🐳 Deployment
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Using Docker Compose
 
+```bash
+# Build and start all services
+docker-compose up -d
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# View logs
+docker-compose logs -f
 
-## Install Nx Console
+# Stop services
+docker-compose down
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### Production Deployment
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+1. **Set environment variables**
 
-## Useful links
+   ```bash
+   export NODE_ENV=production
+   export JWT_SECRET=your-production-secret
+   export MONGODB_URI=mongodb+srv://...
+   ```
 
-Learn more:
+2. **Build services**
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+   ```bash
+   npm run build
+   ```
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+3. **Start with Docker**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+### MongoDB Atlas Setup
+
+1. Create a cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
+2. Create a database user
+3. Whitelist your IP
+4. Get the connection string
+5. Set `MONGODB_URI` in your environment
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run linting
+npm run lint
+
+# Run specific service tests
+nx test user-service
+```
+
+## 📊 Monitoring
+
+The gateway provides health check endpoints:
+
+```bash
+# Gateway health
+curl http://localhost:3000/health
+
+# All services health
+curl http://localhost:3000/health/services
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Nx](https://nx.dev) workspace
+- UI designed with Angular
+- Real-time powered by Socket.IO
+- Database by MongoDB
+
+---
+
+**Made with ❤️ for CSE336 Web Technologies & CSE350 New Product Development**
