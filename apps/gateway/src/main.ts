@@ -129,6 +129,7 @@ const createProxyOptions = (target: string, pathRewrite?: Record<string, string>
   pathRewrite,
   on: {
     proxyReq: (proxyReq, req) => {
+      console.log(`[Proxy] Forwarding ${req.method} ${req.url} -> ${target}${proxyReq.path}`);
       // Forward authentication headers
       const headers = ['authorization', 'x-user-id', 'x-user-role', 'x-session-id'];
       headers.forEach((header) => {
@@ -151,6 +152,12 @@ const createProxyOptions = (target: string, pathRewrite?: Record<string, string>
       });
     },
   },
+});
+
+// Request logging middleware (before routes)
+app.use((req, res, next) => {
+  console.log(`[Gateway] ${req.method} ${req.originalUrl}`);
+  next();
 });
 
 // ==================== ROUTE PROXIES ====================

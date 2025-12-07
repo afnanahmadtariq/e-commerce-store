@@ -45,7 +45,6 @@ const UserSchema = new Schema<IUserDocument>({
     email: {
         type: String,
         required: [true, 'Email is required'],
-        unique: true,
         lowercase: true,
         trim: true,
         match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
@@ -104,7 +103,7 @@ UserSchema.virtual('fullName').get(function (this: IUserDocument) {
 });
 
 // Index for faster queries
-UserSchema.index({ email: 1 });
+UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1, isVerified: 1 });
 

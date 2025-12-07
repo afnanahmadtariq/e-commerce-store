@@ -159,7 +159,7 @@ const ProductSchema = new Schema<IProductDocument>({
 });
 
 // Virtual for available quantity
-ProductSchema.virtual('availableQuantity').get(function(this: IProductDocument) {
+ProductSchema.virtual('availableQuantity').get(function (this: IProductDocument) {
   return this.inventory.quantity - this.inventory.reservedQuantity;
 });
 

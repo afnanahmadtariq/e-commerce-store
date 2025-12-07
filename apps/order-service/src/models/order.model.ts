@@ -156,7 +156,6 @@ const OrderSchema = new Schema<IOrderDocument>({
   orderNumber: {
     type: String,
     required: true,
-    unique: true,
     uppercase: true,
   },
   userId: {
@@ -208,7 +207,7 @@ const OrderSchema = new Schema<IOrderDocument>({
 });
 
 // Indexes
-OrderSchema.index({ orderNumber: 1 });
+OrderSchema.index({ orderNumber: 1 }, { unique: true });
 OrderSchema.index({ userId: 1, status: 1 });
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ 'payment.status': 1 });
