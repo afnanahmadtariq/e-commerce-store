@@ -5,7 +5,7 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: apps/gateway/Dockerfile
+      dockerfile: Dockerfile.gateway
     container_name: ecommerce-gateway
     restart: unless-stopped
     ports:
@@ -30,7 +30,7 @@ services:
   user-service:
     build:
       context: .
-      dockerfile: apps/user-service/Dockerfile
+      dockerfile: Dockerfile.user-service
     container_name: ecommerce-user-service
     restart: unless-stopped
     ports:
@@ -57,7 +57,7 @@ services:
   product-service:
     build:
       context: .
-      dockerfile: apps/product-service/Dockerfile
+      dockerfile: Dockerfile.product-service
     container_name: ecommerce-product-service
     restart: unless-stopped
     ports:
@@ -75,7 +75,7 @@ services:
   cart-service:
     build:
       context: .
-      dockerfile: apps/cart-service/Dockerfile
+      dockerfile: Dockerfile.cart-service
     container_name: ecommerce-cart-service
     restart: unless-stopped
     ports:
@@ -93,7 +93,7 @@ services:
   order-service:
     build:
       context: .
-      dockerfile: apps/order-service/Dockerfile
+      dockerfile: Dockerfile.order-service
     container_name: ecommerce-order-service
     restart: unless-stopped
     ports:
@@ -117,7 +117,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: apps/frontend/Dockerfile
+      dockerfile: Dockerfile.frontend
     container_name: ecommerce-frontend
     restart: unless-stopped
     ports:
