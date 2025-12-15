@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { orderRoutes } from './routes';
+import { AppError } from './AppError';
 
 dotenv.config();
 
@@ -65,12 +66,18 @@ app.get('/health', (req, res) => {
 app.use('/orders', orderRoutes);
 
 // Error handler
+
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error | AppError, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
-  res.status(500).json({
+
+  const statusCode = (err as AppError).statusCode || 500;
+  const message = err.message || 'Internal server error';
+
+  res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal server error',
+    message,
   });
 });
 

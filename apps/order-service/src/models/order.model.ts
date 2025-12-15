@@ -212,8 +212,8 @@ OrderSchema.index({ userId: 1, status: 1 });
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ 'payment.status': 1 });
 
-// Generate order number before saving
-OrderSchema.pre('save', async function () {
+// Generate orderNumber before validation
+OrderSchema.pre('validate', async function () {
   if (this.isNew && !this.orderNumber) {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();

@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, map } from 'rxjs';
+import { Observable, tap, map, catchError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface CartItem {
@@ -98,8 +98,7 @@ export class CartService {
     loadCart(): void {
         this.loading.set(true);
         this.http.get<{ success: boolean; data: { cart: Cart } }>(
-            `${environment.apiUrl}/cart`,
-            { headers: this.getHeaders() }
+            `${environment.apiUrl}/cart`
         ).subscribe({
             next: (response) => {
                 if (response.success) {
@@ -117,16 +116,18 @@ export class CartService {
         this.loading.set(true);
         return this.http.post<{ success: boolean; data: { cart: Cart } }>(
             `${environment.apiUrl}/cart/items`,
-            item,
-            { headers: this.getHeaders() }
+            item
         ).pipe(
-            tap(response => {
-                if (response.success) {
-                    this.cart.set(response.data.cart);
-                }
+            map(response => response.data.cart),
+            tap(cart => {
+                this.cart.set(cart);
                 this.loading.set(false);
             }),
-            map(response => response.data.cart)
+            catchError(error => {
+                console.error('Add to cart error:', error);
+                this.loading.set(false);
+                throw error;
+            })
         );
     }
 

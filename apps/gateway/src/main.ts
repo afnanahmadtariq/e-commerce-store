@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
 import dotenv from 'dotenv';
+import { authMiddleware } from './auth.middleware';
 
 dotenv.config();
 
@@ -76,9 +77,13 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// Authentication Middleware
+
+app.use(authMiddleware);
+
 // Body parsing for non-proxied routes
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json({ limit: '10kb' }));
+// app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get('/health', (req, res) => {

@@ -5,10 +5,10 @@ import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 
 @Component({
-    selector: 'app-header',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
     <header class="header">
       <div class="container header-content">
         <!-- Logo -->
@@ -121,10 +121,13 @@ import { CartService } from '../../services/cart.service';
       }
     </header>
   `,
-    styles: [`
+  styles: [`
     .header {
-      position: sticky;
+      position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
       z-index: 50;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
@@ -372,36 +375,36 @@ import { CartService } from '../../services/cart.service';
   `]
 })
 export class HeaderComponent {
-    authService = inject(AuthService);
-    cartService = inject(CartService);
+  authService = inject(AuthService);
+  cartService = inject(CartService);
 
-    showUserMenu = false;
-    showMobileMenu = false;
+  showUserMenu = false;
+  showMobileMenu = false;
 
-    toggleUserMenu(): void {
-        this.showUserMenu = !this.showUserMenu;
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
+  toggleMobileMenu(): void {
+    this.showMobileMenu = !this.showMobileMenu;
+  }
+
+  getUserInitials(): string {
+    const user = this.authService.currentUser();
+    if (!user) return '?';
+    return (user.firstName[0] + user.lastName[0]).toUpperCase();
+  }
+
+  logout(): void {
+    this.showUserMenu = false;
+    this.authService.logout();
+  }
+
+  onSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value.trim()) {
+      // Navigate to products with search query
+      window.location.href = `/products?search=${encodeURIComponent(input.value.trim())}`;
     }
-
-    toggleMobileMenu(): void {
-        this.showMobileMenu = !this.showMobileMenu;
-    }
-
-    getUserInitials(): string {
-        const user = this.authService.currentUser();
-        if (!user) return '?';
-        return (user.firstName[0] + user.lastName[0]).toUpperCase();
-    }
-
-    logout(): void {
-        this.showUserMenu = false;
-        this.authService.logout();
-    }
-
-    onSearch(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (input.value.trim()) {
-            // Navigate to products with search query
-            window.location.href = `/products?search=${encodeURIComponent(input.value.trim())}`;
-        }
-    }
+  }
 }

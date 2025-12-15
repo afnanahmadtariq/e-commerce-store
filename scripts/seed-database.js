@@ -159,7 +159,7 @@ const users = [
     isEmailVerified: true,
   },
   {
-    email: 'customer@example.com',
+    email: 'customer@ecommerce.com',
     password: 'Customer@123',
     firstName: 'John',
     lastName: 'Doe',

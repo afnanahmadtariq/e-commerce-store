@@ -6,10 +6,10 @@ import { ProductService, Product, Category, ProductFilter } from '../../services
 import { CartService } from '../../services/cart.service';
 
 @Component({
-    selector: 'app-products',
-    standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
-    template: `
+  selector: 'app-products',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
+  template: `
     <div class="products-page">
       <div class="container">
         <div class="page-header">
@@ -163,7 +163,7 @@ import { CartService } from '../../services/cart.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .products-page {
       padding: var(--space-xl) 0 var(--space-3xl);
     }
@@ -408,106 +408,109 @@ import { CartService } from '../../services/cart.service';
   `]
 })
 export class ProductsComponent implements OnInit {
-    productService = inject(ProductService);
-    cartService = inject(CartService);
-    route = inject(ActivatedRoute);
+  productService = inject(ProductService);
+  cartService = inject(CartService);
+  route = inject(ActivatedRoute);
 
-    products: Product[] = [];
-    categories: Category[] = [];
+  products: Product[] = [];
+  categories: Category[] = [];
 
-    filters: ProductFilter = {
-        page: 1,
-        limit: 12
-    };
+  filters: ProductFilter = {
+    page: 1,
+    limit: 12
+  };
 
-    sortOption = 'createdAt-desc';
-    currentPage = 1;
-    totalPages = 1;
-    pageTitle = 'All Products';
-    addingToCart: string | null = null;
+  sortOption = 'createdAt-desc';
+  currentPage = 1;
+  totalPages = 1;
+  pageTitle = 'All Products';
+  addingToCart: string | null = null;
 
-    ngOnInit(): void {
-        this.route.queryParams.subscribe(params => {
-            if (params['category']) {
-                this.filters.category = params['category'];
-                this.pageTitle = this.formatCategoryName(params['category']);
-            }
-            if (params['search']) {
-                this.filters.search = params['search'];
-                this.pageTitle = `Search: "${params['search']}"`;
-            }
-            this.loadProducts();
-        });
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['category']) {
+        this.filters.category = params['category'];
+        this.pageTitle = this.formatCategoryName(params['category']);
+      }
+      if (params['search']) {
+        this.filters.search = params['search'];
+        this.pageTitle = `Search: "${params['search']}"`;
+      }
+      this.loadProducts();
+    });
 
-        this.productService.getCategories().subscribe({
-            next: (categories) => {
-                this.categories = categories;
-            }
-        });
-    }
+    this.productService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      }
+    });
+  }
 
-    loadProducts(): void {
-        this.productService.getProducts(this.filters).subscribe({
-            next: (data) => {
-                this.products = data.products;
-                this.currentPage = data.page;
-                this.totalPages = data.totalPages;
-            },
-            error: () => {
-                this.productService.loading.set(false);
-            }
-        });
-    }
+  loadProducts(): void {
+    this.productService.getProducts(this.filters).subscribe({
+      next: (data) => {
+        this.products = data.products;
+        this.currentPage = data.page;
+        this.totalPages = data.totalPages;
+      },
+      error: () => {
+        this.productService.loading.set(false);
+      }
+    });
+  }
 
-    applyFilters(): void {
-        this.filters.page = 1;
-        this.loadProducts();
-    }
+  applyFilters(): void {
+    this.filters.page = 1;
+    this.loadProducts();
+  }
 
-    clearFilters(): void {
-        this.filters = { page: 1, limit: 12 };
-        this.sortOption = 'createdAt-desc';
-        this.pageTitle = 'All Products';
-        this.loadProducts();
-    }
+  clearFilters(): void {
+    this.filters = { page: 1, limit: 12 };
+    this.sortOption = 'createdAt-desc';
+    this.pageTitle = 'All Products';
+    this.loadProducts();
+  }
 
-    onSortChange(): void {
-        const [sortBy, sortOrder] = this.sortOption.split('-');
-        this.filters.sortBy = sortBy as ProductFilter['sortBy'];
-        this.filters.sortOrder = sortOrder as 'asc' | 'desc';
-        this.loadProducts();
-    }
+  onSortChange(): void {
+    const [sortBy, sortOrder] = this.sortOption.split('-');
+    this.filters.sortBy = sortBy as ProductFilter['sortBy'];
+    this.filters.sortOrder = sortOrder as 'asc' | 'desc';
+    this.loadProducts();
+  }
 
-    goToPage(page: number): void {
-        this.filters.page = page;
-        this.loadProducts();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  goToPage(page: number): void {
+    this.filters.page = page;
+    this.loadProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-    formatCategoryName(slug: string): string {
-        return slug.split('-').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-    }
+  formatCategoryName(slug: string): string {
+    return slug.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  }
 
-    addToCart(product: Product): void {
-        this.addingToCart = product._id;
-        this.cartService.addItem({
-            productId: product._id,
-            name: product.name,
-            slug: product.slug,
-            image: product.images[0]?.url || '',
-            price: product.price,
-            originalPrice: product.compareAtPrice,
-            quantity: 1,
-            maxQuantity: product.inventory.quantity
-        }).subscribe({
-            next: () => {
-                this.addingToCart = null;
-            },
-            error: () => {
-                this.addingToCart = null;
-            }
-        });
-    }
+  addToCart(product: Product): void {
+    this.addingToCart = product._id;
+    this.cartService.addItem({
+      productId: product._id,
+      name: product.name,
+      slug: product.slug,
+      image: product.images[0]?.url || 'assets/placeholder.jpg',
+      price: product.price,
+      originalPrice: product.compareAtPrice,
+      quantity: 1,
+      maxQuantity: product.inventory.quantity
+    }).subscribe({
+      next: () => {
+        this.addingToCart = null;
+        console.log('✅ Item added to cart successfully');
+      },
+      error: (err) => {
+        this.addingToCart = null;
+        console.error('❌ Failed to add item to cart:', err);
+        alert(`Failed to add item to cart: ${err.error?.message || err.message || 'Unknown error'}`);
+      }
+    });
+  }
 }

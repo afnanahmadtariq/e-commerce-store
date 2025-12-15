@@ -5,10 +5,10 @@ import { ProductService, Product } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 
 @Component({
-    selector: 'app-product-detail',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-product-detail',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
     <div class="product-detail-page">
       <div class="container">
         @if (loading) {
@@ -179,7 +179,7 @@ import { CartService } from '../../services/cart.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .product-detail-page {
       padding: var(--space-xl) 0 var(--space-3xl);
     }
@@ -497,74 +497,78 @@ import { CartService } from '../../services/cart.service';
   `]
 })
 export class ProductDetailComponent implements OnInit {
-    productService = inject(ProductService);
-    cartService = inject(CartService);
-    route = inject(ActivatedRoute);
+  productService = inject(ProductService);
+  cartService = inject(CartService);
+  route = inject(ActivatedRoute);
 
-    product: Product | null = null;
-    loading = true;
-    selectedImage = '';
-    quantity = 1;
-    addingToCart = false;
+  product: Product | null = null;
+  loading = true;
+  selectedImage = '';
+  quantity = 1;
+  addingToCart = false;
 
-    ngOnInit(): void {
-        this.route.params.subscribe(params => {
-            this.loadProduct(params['slug']);
-        });
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      this.loadProduct(params['slug']);
+    });
+  }
+
+  loadProduct(slug: string): void {
+    this.loading = true;
+    this.productService.getProductBySlug(slug).subscribe({
+      next: (product) => {
+        this.product = product;
+        this.selectedImage = product.images[0]?.url || '';
+        this.loading = false;
+      },
+      error: () => {
+        this.product = null;
+        this.loading = false;
+      }
+    });
+  }
+
+  getDiscountPercent(): number {
+    if (!this.product || !this.product.compareAtPrice) return 0;
+    return Math.round((1 - this.product.price / this.product.compareAtPrice) * 100);
+  }
+
+  increaseQuantity(): void {
+    if (this.product && this.quantity < this.product.inventory.quantity) {
+      this.quantity++;
     }
+  }
 
-    loadProduct(slug: string): void {
-        this.loading = true;
-        this.productService.getProductBySlug(slug).subscribe({
-            next: (product) => {
-                this.product = product;
-                this.selectedImage = product.images[0]?.url || '';
-                this.loading = false;
-            },
-            error: () => {
-                this.product = null;
-                this.loading = false;
-            }
-        });
+  decreaseQuantity(): void {
+    if (this.quantity > 1) {
+      this.quantity--;
     }
+  }
 
-    getDiscountPercent(): number {
-        if (!this.product || !this.product.compareAtPrice) return 0;
-        return Math.round((1 - this.product.price / this.product.compareAtPrice) * 100);
-    }
+  addToCart(): void {
+    if (!this.product) return;
 
-    increaseQuantity(): void {
-        if (this.product && this.quantity < this.product.inventory.quantity) {
-            this.quantity++;
-        }
-    }
-
-    decreaseQuantity(): void {
-        if (this.quantity > 1) {
-            this.quantity--;
-        }
-    }
-
-    addToCart(): void {
-        if (!this.product) return;
-
-        this.addingToCart = true;
-        this.cartService.addItem({
-            productId: this.product._id,
-            name: this.product.name,
-            slug: this.product.slug,
-            image: this.product.images[0]?.url || '',
-            price: this.product.price,
-            originalPrice: this.product.compareAtPrice,
-            quantity: this.quantity,
-            maxQuantity: this.product.inventory.quantity
-        }).subscribe({
-            next: () => {
-                this.addingToCart = false;
-            },
-            error: () => {
-                this.addingToCart = false;
-            }
-        });
-    }
+    this.addingToCart = true;
+    this.cartService.addItem({
+      productId: this.product._id,
+      name: this.product.name,
+      slug: this.product.slug,
+      image: this.product.images[0]?.url || 'assets/placeholder.jpg',
+      price: this.product.price,
+      originalPrice: this.product.compareAtPrice,
+      quantity: this.quantity,
+      maxQuantity: this.product.inventory.quantity
+    }).subscribe({
+      next: () => {
+        this.addingToCart = false;
+        console.log('✅ Item added to cart successfully');
+        alert('Item added to cart!');
+      },
+      error: (err) => {
+        this.addingToCart = false;
+        console.error('❌ Failed to add item to cart:', err);
+        alert(`Failed to add item to cart: ${err.error?.message || err.message || 'Unknown error'}`);
+      }
+    });
+  }
 }

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { User, IUserDocument, Session } from '../models';
+import { AppError } from '../middleware';
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-super-secret-jwt-key-change-in-production';
 const JWT_REFRESH_SECRET = process.env['JWT_REFRESH_SECRET'] || 'your-refresh-secret-key-change-in-production';
@@ -58,7 +59,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await User.findOne({ email: data.email.toLowerCase() });
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      throw new AppError('User with this email already exists', 400);
     }
 
     // Generate email verification token
@@ -82,26 +83,26 @@ export class AuthService {
 
   // Login user
   static async login(
-    email: string, 
-    password: string, 
-    userAgent: string, 
+    email: string,
+    password: string,
+    userAgent: string,
     ipAddress: string
   ): Promise<{ user: IUserDocument; tokens: AuthTokens }> {
     // Find user with password
     const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new AppError('Invalid email or password', 401);
     }
 
     // Check if user is active
     if (!user.isActive) {
-      throw new Error('Your account has been deactivated. Please contact support.');
+      throw new AppError('Your account has been deactivated. Please contact support.', 403);
     }
 
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw new AppError('Invalid email or password', 401);
     }
 
     // Generate tokens
@@ -128,8 +129,8 @@ export class AuthService {
 
   // Refresh access token
   static async refreshToken(
-    refreshToken: string, 
-    userAgent: string, 
+    refreshToken: string,
+    userAgent: string,
     ipAddress: string
   ): Promise<AuthTokens> {
     try {
@@ -137,20 +138,20 @@ export class AuthService {
       const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as TokenPayload;
 
       // Find session
-      const session = await Session.findOne({ 
-        refreshToken, 
+      const session = await Session.findOne({
+        refreshToken,
         isValid: true,
         expiresAt: { $gt: new Date() },
       });
 
       if (!session) {
-        throw new Error('Invalid or expired refresh token');
+        throw new AppError('Invalid or expired refresh token', 401);
       }
 
       // Find user
       const user = await User.findById(decoded.userId);
       if (!user || !user.isActive) {
-        throw new Error('User not found or inactive');
+        throw new AppError('User not found or inactive', 404);
       }
 
       // Generate new tokens
@@ -172,7 +173,7 @@ export class AuthService {
 
       return newTokens;
     } catch (error) {
-      throw new Error('Invalid or expired refresh token');
+      throw new AppError('Invalid or expired refresh token', 401);
     }
   }
 
@@ -197,7 +198,7 @@ export class AuthService {
     try {
       return jwt.verify(token, JWT_SECRET) as TokenPayload;
     } catch (error) {
-      throw new Error('Invalid or expired access token');
+      throw new AppError('Invalid or expired access token', 401);
     }
   }
 
@@ -213,7 +214,7 @@ export class AuthService {
 
   // Update user profile
   static async updateProfile(
-    userId: string, 
+    userId: string,
     updates: Partial<Pick<IUserDocument, 'firstName' | 'lastName' | 'phone' | 'avatar'>>
   ): Promise<IUserDocument | null> {
     return User.findByIdAndUpdate(
@@ -225,18 +226,18 @@ export class AuthService {
 
   // Change password
   static async changePassword(
-    userId: string, 
-    currentPassword: string, 
+    userId: string,
+    currentPassword: string,
     newPassword: string
   ): Promise<void> {
     const user = await User.findById(userId).select('+password');
     if (!user) {
-      throw new Error('User not found');
+      throw new AppError('User not found', 404);
     }
 
     const isPasswordValid = await user.comparePassword(currentPassword);
     if (!isPasswordValid) {
-      throw new Error('Current password is incorrect');
+      throw new AppError('Current password is incorrect', 401);
     }
 
     user.password = newPassword;
@@ -267,8 +268,8 @@ export class AuthService {
 
   // Update address
   static async updateAddress(
-    userId: string, 
-    addressId: string, 
+    userId: string,
+    addressId: string,
     updates: Partial<IUserDocument['addresses'][0]>
   ): Promise<IUserDocument | null> {
     // If setting as default, unset other defaults
@@ -280,13 +281,13 @@ export class AuthService {
 
     return User.findByIdAndUpdate(
       userId,
-      { 
+      {
         $set: Object.fromEntries(
           Object.entries(updates).map(([key, value]) => [`addresses.$[addr].${key}`, value])
         ),
       },
-      { 
-        new: true, 
+      {
+        new: true,
         runValidators: true,
         arrayFilters: [{ 'addr._id': addressId }],
       }
@@ -304,8 +305,8 @@ export class AuthService {
 
   // Get all users (admin)
   static async getAllUsers(
-    page = 1, 
-    limit = 20, 
+    page = 1,
+    limit = 20,
     filters: { role?: string; isActive?: boolean; search?: string } = {}
   ): Promise<{ users: IUserDocument[]; total: number; page: number; totalPages: number }> {
     const query: Record<string, unknown> = {};
