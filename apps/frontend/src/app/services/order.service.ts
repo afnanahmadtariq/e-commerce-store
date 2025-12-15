@@ -18,7 +18,6 @@ export type OrderStatus =
 export type PaymentMethod =
     | 'credit_card'
     | 'debit_card'
-    | 'paypal'
     | 'stripe'
     | 'bank_transfer'
     | 'cash_on_delivery';

@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { authGuard, guestGuard } from './guards/auth.guard';
+import { authGuard, guestGuard, adminGuard } from './guards/auth.guard';
 
 export const appRoutes: Route[] = [
     {
@@ -9,6 +9,10 @@ export const appRoutes: Route[] = [
     {
         path: 'products',
         loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
+    },
+    {
+        path: 'categories',
+        loadComponent: () => import('./pages/categories/categories.component').then(m => m.CategoriesComponent)
     },
     {
         path: 'products/:slug',
@@ -47,6 +51,11 @@ export const appRoutes: Route[] = [
         path: 'auth/register',
         loadComponent: () => import('./pages/auth/register.component').then(m => m.RegisterComponent),
         canActivate: [guestGuard]
+    },
+    {
+        path: 'admin',
+        loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),
+        canActivate: [adminGuard]
     },
     {
         path: '**',

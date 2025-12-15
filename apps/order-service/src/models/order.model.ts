@@ -22,7 +22,6 @@ export type PaymentStatus =
 export type PaymentMethod =
   | 'credit_card'
   | 'debit_card'
-  | 'paypal'
   | 'stripe'
   | 'bank_transfer'
   | 'cash_on_delivery';
@@ -123,7 +122,7 @@ const AddressSchema = new Schema({
 const PaymentSchema = new Schema({
   method: {
     type: String,
-    enum: ['credit_card', 'debit_card', 'paypal', 'stripe', 'bank_transfer', 'cash_on_delivery'],
+    enum: ['credit_card', 'debit_card', 'stripe', 'bank_transfer', 'cash_on_delivery'],
     required: true,
   },
   status: {
