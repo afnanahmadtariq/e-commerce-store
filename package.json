@@ -38,6 +38,7 @@
     "@angular/platform-server": "~20.3.0",
     "@angular/router": "~20.3.0",
     "@angular/ssr": "~20.3.0",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
     "cors": "^2.8.5",

@@ -78,6 +78,8 @@ export const EXPECTED_ROUTES: RouteConfig[] = [
 
   // ==================== ORDER SERVICE ====================
   { method: 'POST', path: '/api/orders/checkout', service: 'order-service', expectedBackendPath: '/orders/checkout', description: 'Create order from cart' },
+  { method: 'POST', path: '/api/orders/confirm-payment', service: 'order-service', expectedBackendPath: '/orders/confirm-payment', description: 'Confirm Stripe payment' },
+  { method: 'POST', path: '/api/orders/webhook', service: 'order-service', expectedBackendPath: '/orders/webhook', description: 'Stripe webhook handler' },
   { method: 'GET', path: '/api/orders/my-orders', service: 'order-service', expectedBackendPath: '/orders/my-orders', description: 'Get current user orders' },
   { method: 'GET', path: '/api/orders/statistics', service: 'order-service', expectedBackendPath: '/orders/statistics', description: 'Get order statistics (Admin)' },
   { method: 'GET', path: '/api/orders/recent', service: 'order-service', expectedBackendPath: '/orders/recent', description: 'Get recent orders (Admin)' },

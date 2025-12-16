@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services';
+import { PaymentService } from '../services/payment.service';
 
 const router = Router();
 
@@ -52,7 +53,7 @@ router.post(
                 return;
             }
 
-            const order = await OrderService.create({
+            const result = await OrderService.create({
                 userId,
                 items,
                 shippingAddress,
@@ -66,13 +67,102 @@ router.post(
                 notes,
             });
 
+            const responseData: any = { order: result.order };
+            if (result.paymentIntent) {
+                responseData.paymentIntent = {
+                    id: result.paymentIntent.id,
+                    client_secret: result.paymentIntent.client_secret,
+                    amount: result.paymentIntent.amount,
+                    currency: result.paymentIntent.currency,
+                };
+            }
+
             res.status(201).json({
                 success: true,
                 message: 'Order placed successfully',
+                data: responseData,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
+ * @route POST /orders/confirm-payment
+ * @desc Confirm Stripe payment
+ * @access Private
+ */
+router.post(
+    '/confirm-payment',
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { orderId, paymentIntentId } = req.body;
+
+            if (!orderId || !paymentIntentId) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Order ID and payment intent ID are required',
+                });
+                return;
+            }
+
+            const order = await OrderService.confirmPayment(orderId, paymentIntentId);
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment confirmed successfully',
                 data: { order },
             });
         } catch (error) {
             next(error);
+        }
+    }
+);
+
+/**
+ * @route POST /orders/webhook
+ * @desc Handle Stripe webhooks
+ * @access Public
+ */
+router.post(
+    '/webhook',
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const sig = req.headers['stripe-signature'] as string;
+            const paymentService = new PaymentService();
+
+            const event = await paymentService.processWebhook(req.body, sig);
+
+            // Handle the event
+            switch (event.type) {
+                case 'payment_intent.succeeded':
+                    const paymentIntent = event.data.object as any;
+                    const orderId = paymentIntent.metadata.orderId;
+
+                    if (orderId) {
+                        try {
+                            await OrderService.confirmPayment(orderId, paymentIntent.id);
+                            console.log(`Payment confirmed via webhook for order: ${orderId}`);
+                        } catch (error) {
+                            console.error('Error confirming payment via webhook:', error);
+                        }
+                    }
+                    break;
+
+                case 'payment_intent.payment_failed':
+                    // Handle failed payment
+                    console.log('Payment failed:', event.data.object);
+                    break;
+
+                default:
+                    console.log(`Unhandled event type ${event.type}`);
+            }
+
+            res.status(200).json({ received: true });
+        } catch (error) {
+            console.error('Webhook error:', error);
+            res.status(400).send(`Webhook Error: ${error}`);
         }
     }
 );

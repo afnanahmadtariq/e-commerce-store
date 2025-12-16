@@ -1,4 +1,6 @@
 import { Order, IOrderDocument, OrderStatus, PaymentStatus, PaymentMethod } from '../models/order.model';
+import { PaymentService } from './payment.service';
+import axios from 'axios';
 
 export interface CreateOrderData {
     userId: string;
@@ -52,7 +54,7 @@ const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 
 export class OrderService {
     // Create new order
-    static async create(data: CreateOrderData): Promise<IOrderDocument> {
+    static async create(data: CreateOrderData): Promise<{ order: IOrderDocument; paymentIntent?: any }> {
         // Calculate item subtotals
         const items = data.items.map((item) => ({
             ...item,
@@ -90,8 +92,83 @@ export class OrderService {
         const order = new Order(orderData);
         await order.save();
 
+        let paymentIntent;
+
+        // Create payment intent for Stripe payments
+        if (data.paymentMethod === 'stripe') {
+            const paymentService = new PaymentService();
+            paymentIntent = await paymentService.createPaymentIntent({
+                amount: total,
+                currency: 'USD', // You can make this configurable
+                orderId: order._id.toString(),
+                customerEmail: data.shippingAddress.email,
+                metadata: {
+                    orderNumber: order.orderNumber,
+                    userId: data.userId,
+                },
+            });
+
+            // Update order with payment intent ID
+            order.payment.transactionId = paymentIntent.id;
+            await order.save();
+        }
+
         // TODO: Emit order.created event for inventory reservation
         console.log(`Order created: ${order.orderNumber}`);
+
+        return { order, paymentIntent };
+    }
+
+    static async confirmPayment(orderId: string, paymentIntentId: string): Promise<IOrderDocument> {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        if (order.payment.method !== 'stripe') {
+            throw new Error('Payment method not supported for confirmation');
+        }
+
+        // Verify payment intent
+        const paymentService = new PaymentService();
+        const paymentIntent = await paymentService.confirmPaymentIntent(paymentIntentId);
+
+        if (paymentIntent.status === 'succeeded') {
+            // Update payment status
+            order.payment.status = 'captured';
+            order.payment.transactionId = paymentIntentId;
+            order.payment.paidAt = new Date();
+
+            // Update order status
+            order.status = 'confirmed';
+            order.statusHistory.push({
+                status: 'confirmed',
+                timestamp: new Date(),
+                note: 'Payment received',
+            });
+
+            await order.save();
+
+            // Update inventory for each item
+            const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002';
+            for (const item of order.items) {
+                try {
+                    await axios.patch(`${productServiceUrl}/products/${item.productId}/confirm-inventory`, {
+                        quantity: item.quantity,
+                    });
+                    console.log(`Updated inventory for product ${item.productId}: -${item.quantity}`);
+                } catch (error) {
+                    console.error(`Failed to update inventory for product ${item.productId}:`, error);
+                    // Continue with other items even if one fails
+                }
+            }
+
+            // TODO: Emit order.confirmed event
+
+            console.log(`Payment confirmed for order: ${order.orderNumber}`);
+        } else {
+            throw new Error('Payment not completed');
+        }
 
         return order;
     }

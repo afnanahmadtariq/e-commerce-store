@@ -478,4 +478,36 @@ router.post(
   }
 );
 
+/**
+ * @route PATCH /products/:productId/confirm-inventory
+ * @desc Confirm inventory reduction after successful payment
+ * @access Private (Service-to-Service)
+ */
+router.patch(
+  '/:productId/confirm-inventory',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params;
+      const { quantity } = req.body;
+
+      if (!quantity || quantity <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Valid quantity is required',
+        });
+        return;
+      }
+
+      await ProductService.confirmInventory(productId, quantity);
+
+      res.json({
+        success: true,
+        message: 'Inventory updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;
