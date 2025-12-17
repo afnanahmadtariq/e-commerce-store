@@ -15,52 +15,98 @@ import { environment } from '../../../environments/environment';
     <section class="hero">
       <div class="container">
         <div class="hero-content">
-          <span class="hero-badge">✨ New Collection 2024</span>
+          <span class="hero-badge">✨ Premium E-Commerce Experience</span>
           <h1>Discover Your <span class="gradient-text">Perfect Style</span></h1>
-          <p>Shop the latest trends with amazing deals. Quality products, unbeatable prices, and fast delivery.</p>
+          <p>Shop the latest trends with amazing deals. Quality products, unbeatable prices, and lightning-fast delivery worldwide.</p>
           <div class="hero-actions">
-            <a routerLink="/products" class="btn btn-primary btn-lg">
+            <a routerLink="/products" class="btn btn-primary btn-lg btn-glow">
               Shop Now
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
               </svg>
             </a>
-            <a routerLink="/categories" class="btn btn-secondary btn-lg">Browse Categories</a>
+            <a routerLink="/categories" class="btn btn-glass btn-lg">Browse Categories</a>
           </div>
           <div class="hero-stats">
-            <div class="stat">
-              <strong>{{ stats.totalOrders | number:'1.0-0' }}+</strong>
-              <span>Orders Delivered</span>
+            <div class="stat-card">
+              <div class="stat-value">
+                @if (statsLoading) {
+                  <span class="stat-loading"></span>
+                } @else {
+                  <strong>{{ stats.totalOrders }}</strong>
+                }
+              </div>
+              <span class="stat-label">Orders Completed</span>
             </div>
-            <div class="stat">
-              <strong>{{ stats.totalProducts | number:'1.0-0' }}+</strong>
-              <span>Products</span>
+            <div class="stat-card">
+              <div class="stat-value">
+                @if (statsLoading) {
+                  <span class="stat-loading"></span>
+                } @else {
+                  <strong>{{ stats.totalProducts }}</strong>
+                }
+              </div>
+              <span class="stat-label">Products Available</span>
             </div>
-            <div class="stat">
-              <strong>{{ stats.avgRating | number:'1.1-1' }}★</strong>
-              <span>Avg Rating</span>
+            <div class="stat-card">
+              <div class="stat-value">
+                <strong>{{ stats.avgRating }}</strong>
+              </div>
+              <span class="stat-label">Average Rating</span>
             </div>
           </div>
         </div>
         <div class="hero-visual">
           <div class="hero-image-container">
             <div class="hero-image">
-              <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&h=700&fit=crop" alt="Fashion collection" />
+              <img src="/images/hero-fashion.png" alt="Fashion collection" />
+              <div class="hero-overlay"></div>
             </div>
             <div class="floating-card card-1">
-              <span class="icon">🚚</span>
+              <span class="icon">🚀</span>
               <div>
-                <strong>Free Shipping</strong>
-                <span>On orders over $50</span>
+                <strong>Fast Delivery</strong>
+                <span>2-3 Business Days</span>
               </div>
             </div>
             <div class="floating-card card-2">
-              <span class="icon">⭐</span>
+              <span class="icon">🛡️</span>
               <div>
-                <strong>4.9 Rating</strong>
-                <span>From 10k+ reviews</span>
+                <strong>Secure Checkout</strong>
+                <span>256-bit SSL</span>
               </div>
             </div>
+            <div class="floating-card card-3">
+              <span class="icon">⭐</span>
+              <div>
+                <strong>Top Rated</strong>
+                <span>{{ stats.avgRating }} Stars</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Badges -->
+    <section class="trust-section">
+      <div class="container">
+        <div class="trust-badges">
+          <div class="trust-badge">
+            <span class="trust-icon">🔒</span>
+            <span>Secure Payment</span>
+          </div>
+          <div class="trust-badge">
+            <span class="trust-icon">🚚</span>
+            <span>Free Shipping $50+</span>
+          </div>
+          <div class="trust-badge">
+            <span class="trust-icon">↩️</span>
+            <span>30-Day Returns</span>
+          </div>
+          <div class="trust-badge">
+            <span class="trust-icon">💬</span>
+            <span>24/7 Support</span>
           </div>
         </div>
       </div>
@@ -334,7 +380,7 @@ import { environment } from '../../../environments/environment';
       position: relative;
       border-radius: var(--radius-2xl);
       overflow: hidden;
-      box-shadow: var(--shadow-2xl);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
     .hero-image img {
@@ -343,26 +389,35 @@ import { environment } from '../../../environments/environment';
       object-fit: cover;
     }
 
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+    }
+
     .floating-card {
       position: absolute;
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      padding: var(--space-md);
-      background: white;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      animation: float 3s ease-in-out infinite;
+      padding: var(--space-md) var(--space-lg);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      animation: float 4s ease-in-out infinite;
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
     .floating-card .icon {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
     }
 
     .floating-card strong {
       display: block;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       color: var(--gray-900);
+      font-weight: 700;
     }
 
     .floating-card span {
@@ -371,19 +426,136 @@ import { environment } from '../../../environments/environment';
     }
 
     .card-1 {
-      top: 20%;
-      left: -40px;
+      top: 15%;
+      left: -30px;
     }
 
     .card-2 {
-      bottom: 20%;
-      right: -40px;
+      bottom: 35%;
+      right: -30px;
       animation-delay: 1.5s;
     }
 
+    .card-3 {
+      bottom: 10%;
+      left: 20%;
+      animation-delay: 3s;
+    }
+
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    /* Trust Badges Section */
+    .trust-section {
+      background: white;
+      padding: var(--space-lg) 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-3xl);
+      flex-wrap: wrap;
+    }
+
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .trust-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-xl);
+      padding: var(--space-lg);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      min-width: 120px;
+    }
+
+    .stat-value {
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-value strong {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-loading {
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Glowing Button */
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-glow::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      50%, 100% { left: 100%; }
+    }
+
+    /* Glass Button */
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      color: var(--gray-700);
+      font-weight: 600;
+    }
+
+    .btn-glass:hover {
+      background: white;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     /* Categories Section */
@@ -658,12 +830,13 @@ export class HomeComponent implements OnInit {
     categories: Category[] = [];
     loading = true;
     addingToCart: string | null = null;
+    statsLoading = true;
     
     // Real stats from database
     stats = {
         totalOrders: 0,
         totalProducts: 0,
-        avgRating: 4.8
+        avgRating: '4.8★'
     };
 
     ngOnInit(): void {
@@ -692,10 +865,25 @@ export class HomeComponent implements OnInit {
     }
     
     private loadStats(): void {
+        let productsLoaded = false;
+        let ordersLoaded = false;
+        
+        const checkComplete = () => {
+            if (productsLoaded && ordersLoaded) {
+                this.statsLoading = false;
+            }
+        };
+        
         // Get total products count
         this.productService.getProducts({ limit: 1 }).subscribe({
             next: (response) => {
                 this.stats.totalProducts = response.total;
+                productsLoaded = true;
+                checkComplete();
+            },
+            error: () => {
+                productsLoaded = true;
+                checkComplete();
             }
         });
         
@@ -707,6 +895,12 @@ export class HomeComponent implements OnInit {
                 if (response.success && response.data.statistics) {
                     this.stats.totalOrders = response.data.statistics.deliveredOrders || response.data.statistics.totalOrders || 0;
                 }
+                ordersLoaded = true;
+                checkComplete();
+            },
+            error: () => {
+                ordersLoaded = true;
+                checkComplete();
             }
         });
     }
