@@ -22,9 +22,14 @@ import { AuthService, RegisterRequest } from '../../services/auth.service';
           </div>
 
           <form (ngSubmit)="onSubmit()" class="auth-form">
-            @if (error) {
-              <div class="alert alert-error">{{ error }}</div>
-            }
+            <div *ngIf="error" class="alert alert-error">
+              <ng-container *ngIf="isArray(error); else singleError">
+                <ul style="margin:0; padding-left:1.2em;">
+                  <li *ngFor="let errMsg of error">{{ errMsg }}</li>
+                </ul>
+              </ng-container>
+              <ng-template #singleError>{{ error }}</ng-template>
+            </div>
 
             <div class="form-row">
               <div class="form-group">
@@ -277,6 +282,7 @@ import { AuthService, RegisterRequest } from '../../services/auth.service';
   `]
 })
 export class RegisterComponent {
+      isArray = Array.isArray;
     authService = inject(AuthService);
     router = inject(Router);
 
@@ -289,7 +295,7 @@ export class RegisterComponent {
     };
 
     loading = false;
-    error = '';
+    error: string | string[] = '';
     showPassword = false;
     acceptTerms = false;
 
@@ -312,13 +318,25 @@ export class RegisterComponent {
         this.loading = true;
         this.error = '';
 
-        this.authService.register(this.data).subscribe({
+        // If phone is empty string, set to undefined so backend treats as optional
+        const submitData = { ...this.data, phone: this.data.phone?.trim() ? this.data.phone : undefined };
+
+        this.authService.register(submitData).subscribe({
             next: () => {
                 this.router.navigate(['/']);
             },
             error: (err) => {
                 this.loading = false;
-                this.error = typeof err === 'string' ? err : 'Registration failed. Please try again.';
+                // If backend returns validation errors array, display all
+                if (err && err.errors && Array.isArray(err.errors)) {
+                  this.error = err.errors.map((e: { message?: string } | string) => typeof e === 'string' ? e : e.message || 'Validation error');
+                } else if (typeof err === 'string') {
+                    this.error = err;
+                } else if (err && err.message) {
+                    this.error = err.message;
+                } else {
+                    this.error = 'Registration failed. Please try again.';
+                }
             }
         });
     }

@@ -99,6 +99,10 @@ export class AuthService {
             }),
             map(response => response.data),
             catchError(error => {
+                // If backend returns validation errors array, pass it through
+                if (error.error && error.error.errors) {
+                    throw { errors: error.error.errors, message: error.error.message };
+                }
                 throw error.error?.message || 'Registration failed';
             })
         );
