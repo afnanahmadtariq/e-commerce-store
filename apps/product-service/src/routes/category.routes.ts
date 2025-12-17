@@ -143,6 +143,35 @@ router.post(
 );
 
 /**
+ * @route PUT /categories/reorder
+ * @desc Reorder categories (admin)
+ * @access Private/Admin
+ */
+router.put(
+  '/reorder',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderedIds } = req.body;
+      if (!Array.isArray(orderedIds)) {
+        res.status(400).json({
+          success: false,
+          message: 'orderedIds must be an array',
+        });
+        return;
+      }
+      
+      await CategoryService.reorder(orderedIds);
+      res.json({
+        success: true,
+        message: 'Categories reordered successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * @route PUT /categories/:id
  * @desc Update category (admin)
  * @access Private/Admin
@@ -198,33 +227,6 @@ router.delete(
   }
 );
 
-/**
- * @route PUT /categories/reorder
- * @desc Reorder categories (admin)
- * @access Private/Admin
- */
-router.put(
-  '/reorder',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { orderedIds } = req.body;
-      if (!Array.isArray(orderedIds)) {
-        res.status(400).json({
-          success: false,
-          message: 'orderedIds must be an array',
-        });
-        return;
-      }
-      
-      await CategoryService.reorder(orderedIds);
-      res.json({
-        success: true,
-        message: 'Categories reordered successfully',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-);
+
 
 export default router;

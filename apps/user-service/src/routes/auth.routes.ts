@@ -266,7 +266,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Address added successfully',
-        data: { addresses: user?.addresses },
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -294,7 +294,7 @@ router.put(
       res.json({
         success: true,
         message: 'Address updated successfully',
-        data: { addresses: user?.addresses },
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -317,7 +317,7 @@ router.delete(
       res.json({
         success: true,
         message: 'Address deleted successfully',
-        data: { addresses: user?.addresses },
+        data: { user },
       });
     } catch (error) {
       next(error);
