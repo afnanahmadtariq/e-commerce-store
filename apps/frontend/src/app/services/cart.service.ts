@@ -98,7 +98,8 @@ export class CartService {
     loadCart(): void {
         this.loading.set(true);
         this.http.get<{ success: boolean; data: { cart: Cart } }>(
-            `${environment.apiUrl}/cart`
+            `${environment.apiUrl}/cart`,
+            { headers: this.getHeaders() }
         ).subscribe({
             next: (response) => {
                 if (response.success) {
@@ -116,7 +117,8 @@ export class CartService {
         this.loading.set(true);
         return this.http.post<{ success: boolean; data: { cart: Cart } }>(
             `${environment.apiUrl}/cart/items`,
-            item
+            item,
+            { headers: this.getHeaders() }
         ).pipe(
             map(response => response.data.cart),
             tap(cart => {
