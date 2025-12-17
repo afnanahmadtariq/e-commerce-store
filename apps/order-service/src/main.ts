@@ -9,7 +9,7 @@ import { AppError } from './AppError';
 
 dotenv.config();
 
-const host = process.env['HOST'] ?? 'localhost';
+const host = process.env['HOST'] ?? '0.0.0.0';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3004;
 const dbName = process.env['DB_NAME'] || 'ecommerce_orders';
 const baseUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017';
