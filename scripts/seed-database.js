@@ -126,7 +126,7 @@ const products = [
     brand: 'AudioTech',
     tags: ['earbuds', 'wireless', 'audio', 'waterproof'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1572569028738-411a0977d4aa', alt: 'Earbuds', isPrimary: true, order: 0 }
+      { url: '/images/products/wireless-earbuds.png', alt: 'Earbuds', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 100, trackInventory: true },
     isFeatured: true,
@@ -142,7 +142,7 @@ const products = [
     brand: 'SecureHome',
     tags: ['security', 'smart home', 'camera', 'wifi'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1557324232-b6ab28d7d9bd', alt: 'Security Camera', isPrimary: true, order: 0 }
+      { url: '/images/products/security-camera.png', alt: 'Security Camera', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 60, trackInventory: true },
     ratings: { average: 4.3, count: 87 }
@@ -411,7 +411,7 @@ const products = [
     category: 'Books',
     tags: ['books', 'finance', 'money', 'business'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1554774853-710156ffd9c6', alt: 'Finance Book', isPrimary: true, order: 0 }
+      { url: '/images/products/financial-book.png', alt: 'Finance Book', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 90, trackInventory: true },
     isFeatured: true,
@@ -499,7 +499,7 @@ const products = [
     category: 'Home & Garden',
     tags: ['bedroom', 'sleep', 'comfort', 'home'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e6', alt: 'Pillow', isPrimary: true, order: 0 }
+      { url: '/images/products/pillow.png', alt: 'Pillow', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 100, trackInventory: true },
     ratings: { average: 4.5, count: 450 }
@@ -528,7 +528,7 @@ const products = [
     category: 'Home & Garden',
     tags: ['lighting', 'decor', 'furniture', 'home'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1507473888900-52e1adad8136', alt: 'Floor Lamp', isPrimary: true, order: 0 }
+      { url: '/images/products/floor-lamp.png', alt: 'Floor Lamp', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 45, trackInventory: true },
     ratings: { average: 4.6, count: 89 }
@@ -589,7 +589,7 @@ const products = [
     category: 'Sports',
     tags: ['tennis', 'sports', 'racket', 'outdoor'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1617083200051-86cbd54e26ce', alt: 'Tennis Racket', isPrimary: true, order: 0 }
+      { url: '/images/products/tennis-racket.png', alt: 'Tennis Racket', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 40, trackInventory: true },
     ratings: { average: 4.6, count: 23 }
@@ -646,7 +646,7 @@ const products = [
     category: 'Sports',
     tags: ['cycling', 'bike', 'safety', 'helmet'],
     images: [
-      { url: 'https://images.unsplash.com/photo-1557803175-298c8636a0d4', alt: 'Cycling Helmet', isPrimary: true, order: 0 }
+      { url: '/images/products/cycling-helmet.png', alt: 'Cycling Helmet', isPrimary: true, order: 0 }
     ],
     inventory: { quantity: 50, trackInventory: true },
     ratings: { average: 4.8, count: 89 }
