@@ -43,17 +43,29 @@ export class CartService {
   static async getOrCreateCart(identifier: CartIdentifier): Promise<ICartDocument> {
     const { userId, sessionId } = identifier;
 
-    let cart = await Cart.findOne({
-      $or: [
-        { userId: userId || undefined },
-        { sessionId: sessionId || undefined },
-      ].filter((q) => Object.values(q)[0] !== undefined),
-    });
+    // Build query conditions - only add if the value is actually present (not empty/null/undefined)
+    const conditions: Array<{ userId?: string } | { sessionId?: string }> = [];
+    if (userId && userId.trim()) {
+      conditions.push({ userId });
+    }
+    if (sessionId && sessionId.trim()) {
+      conditions.push({ sessionId });
+    }
+
+    // Only query if we have valid conditions
+    let cart: ICartDocument | null = null;
+    if (conditions.length > 0) {
+      cart = await Cart.findOne({ $or: conditions });
+    }
 
     if (!cart) {
+      // Only create if we have at least one valid identifier
+      if (conditions.length === 0) {
+        throw new Error('Either userId or sessionId is required to create a cart');
+      }
       cart = await Cart.create({
-        userId,
-        sessionId,
+        userId: userId && userId.trim() ? userId : undefined,
+        sessionId: sessionId && sessionId.trim() ? sessionId : undefined,
         items: [],
         subtotal: 0,
         discount: 0,
@@ -70,12 +82,21 @@ export class CartService {
   static async getCart(identifier: CartIdentifier): Promise<ICartDocument | null> {
     const { userId, sessionId } = identifier;
 
-    return Cart.findOne({
-      $or: [
-        { userId: userId || undefined },
-        { sessionId: sessionId || undefined },
-      ].filter((q) => Object.values(q)[0] !== undefined),
-    });
+    // Build query conditions - only add if the value is actually present
+    const conditions: Array<{ userId?: string } | { sessionId?: string }> = [];
+    if (userId && userId.trim()) {
+      conditions.push({ userId });
+    }
+    if (sessionId && sessionId.trim()) {
+      conditions.push({ sessionId });
+    }
+
+    // Return null if no valid conditions (don't query with empty $or)
+    if (conditions.length === 0) {
+      return null;
+    }
+
+    return Cart.findOne({ $or: conditions });
   }
 
   // Add item to cart
@@ -329,8 +350,8 @@ export class CartService {
     cart.total = Math.round((afterDiscount + cart.tax + cart.shipping) * 100) / 100;
   }
 
-  // Format cart for response
-  private static formatCart(cart: ICartDocument) {
+  // Format cart for response - public for use in route handlers
+  static formatCart(cart: ICartDocument) {
     return {
       id: cart._id,
       items: cart.items,
@@ -465,12 +486,21 @@ export class CartService {
   static async deleteCart(identifier: CartIdentifier): Promise<boolean> {
     const { userId, sessionId } = identifier;
 
-    const result = await Cart.findOneAndDelete({
-      $or: [
-        { userId: userId || undefined },
-        { sessionId: sessionId || undefined },
-      ].filter((q) => Object.values(q)[0] !== undefined),
-    });
+    // Build query conditions - only add if the value is actually present
+    const conditions: Array<{ userId?: string } | { sessionId?: string }> = [];
+    if (userId && userId.trim()) {
+      conditions.push({ userId });
+    }
+    if (sessionId && sessionId.trim()) {
+      conditions.push({ sessionId });
+    }
+
+    // Don't delete anything if no valid conditions
+    if (conditions.length === 0) {
+      return false;
+    }
+
+    const result = await Cart.findOneAndDelete({ $or: conditions });
 
     return !!result;
   }

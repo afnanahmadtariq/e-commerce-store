@@ -24,13 +24,18 @@ router.get(
       res.json({
         success: true,
         data: {
-          cart: cart || {
+          cart: cart ? CartService.formatCart(cart) : {
+            id: null,
             items: [],
+            itemCount: 0,
             subtotal: 0,
             discount: 0,
             tax: 0,
             shipping: 0,
             total: 0,
+            currency: 'USD',
+            freeShippingThreshold: 50,
+            amountToFreeShipping: 50,
           },
         },
       });
@@ -97,7 +102,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Item added to cart',
-        data: { cart },
+        data: { cart: CartService.formatCart(cart) },
       });
     } catch (error) {
       next(error);
@@ -142,7 +147,7 @@ router.put(
       res.json({
         success: true,
         message: quantity === 0 ? 'Item removed from cart' : 'Cart updated',
-        data: { cart },
+        data: { cart: CartService.formatCart(cart) },
       });
     } catch (error) {
       next(error);
@@ -173,7 +178,7 @@ router.delete(
       res.json({
         success: true,
         message: 'Item removed from cart',
-        data: { cart },
+        data: { cart: CartService.formatCart(cart) },
       });
     } catch (error) {
       next(error);
@@ -196,7 +201,7 @@ router.delete(
       res.json({
         success: true,
         message: 'Cart cleared',
-        data: { cart },
+        data: { cart: cart ? CartService.formatCart(cart) : null },
       });
     } catch (error) {
       next(error);
@@ -229,7 +234,7 @@ router.post(
       res.json({
         success: true,
         message: 'Coupon applied successfully',
-        data: { cart },
+        data: { cart: CartService.formatCart(cart) },
       });
     } catch (error) {
       next(error);
@@ -260,7 +265,7 @@ router.delete(
       res.json({
         success: true,
         message: 'Coupon removed',
-        data: { cart },
+        data: { cart: CartService.formatCart(cart) },
       });
     } catch (error) {
       next(error);
@@ -293,7 +298,7 @@ router.post(
       res.json({
         success: true,
         message: 'Carts merged successfully',
-        data: { cart },
+        data: { cart: cart ? CartService.formatCart(cart) : null },
       });
     } catch (error) {
       next(error);
