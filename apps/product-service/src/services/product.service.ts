@@ -89,9 +89,10 @@ export class ProductService {
 
     const query: Record<string, unknown> = { isActive };
 
-    if (category) query.category = category;
-    if (subcategory) query.subcategory = subcategory;
-    if (brand) query.brand = brand;
+    // Case-insensitive category/subcategory/brand matching to support both slugs and display names
+    if (category) query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    if (subcategory) query.subcategory = { $regex: new RegExp(`^${subcategory}$`, 'i') };
+    if (brand) query.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
     if (typeof isFeatured === 'boolean') query.isFeatured = isFeatured;
 
     if (minPrice !== undefined || maxPrice !== undefined) {
