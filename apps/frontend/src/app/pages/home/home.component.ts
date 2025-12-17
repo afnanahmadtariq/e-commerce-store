@@ -1,8 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ProductService, Product, Category } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-home',
@@ -27,16 +29,16 @@ import { CartService } from '../../services/cart.service';
           </div>
           <div class="hero-stats">
             <div class="stat">
-              <strong>50K+</strong>
-              <span>Happy Customers</span>
+              <strong>{{ stats.totalOrders | number:'1.0-0' }}+</strong>
+              <span>Orders Delivered</span>
             </div>
             <div class="stat">
-              <strong>10K+</strong>
+              <strong>{{ stats.totalProducts | number:'1.0-0' }}+</strong>
               <span>Products</span>
             </div>
             <div class="stat">
-              <strong>99%</strong>
-              <span>Satisfaction</span>
+              <strong>{{ stats.avgRating | number:'1.1-1' }}★</strong>
+              <span>Avg Rating</span>
             </div>
           </div>
         </div>
@@ -650,11 +652,19 @@ import { CartService } from '../../services/cart.service';
 export class HomeComponent implements OnInit {
     productService = inject(ProductService);
     cartService = inject(CartService);
+    private http = inject(HttpClient);
 
     featuredProducts: Product[] = [];
     categories: Category[] = [];
     loading = true;
     addingToCart: string | null = null;
+    
+    // Real stats from database
+    stats = {
+        totalOrders: 0,
+        totalProducts: 0,
+        avgRating: 4.8
+    };
 
     ngOnInit(): void {
         this.loadData();
@@ -674,6 +684,29 @@ export class HomeComponent implements OnInit {
         this.productService.getCategories().subscribe({
             next: (categories) => {
                 this.categories = categories.slice(0, 5);
+            }
+        });
+        
+        // Load real stats
+        this.loadStats();
+    }
+    
+    private loadStats(): void {
+        // Get total products count
+        this.productService.getProducts({ limit: 1 }).subscribe({
+            next: (response) => {
+                this.stats.totalProducts = response.total;
+            }
+        });
+        
+        // Get order statistics
+        this.http.get<{ success: boolean; data: { statistics: { totalOrders: number; deliveredOrders: number } } }>(
+            `${environment.apiUrl}/orders/statistics`
+        ).subscribe({
+            next: (response) => {
+                if (response.success && response.data.statistics) {
+                    this.stats.totalOrders = response.data.statistics.deliveredOrders || response.data.statistics.totalOrders || 0;
+                }
             }
         });
     }

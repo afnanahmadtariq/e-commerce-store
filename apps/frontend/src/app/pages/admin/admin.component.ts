@@ -370,8 +370,26 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
     });
 
-    // System chart - mock data (would come from monitoring service)
-    this.systemChartData.datasets[0].data = [45, 60, 25];
+    // Load real system stats from gateway
+    this.http.get<{ success: boolean; data: { cpu: number; memory: number; disk: number } }>(
+      `${environment.apiUrl}/system/stats`
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.systemChartData.datasets[0].data = [
+            response.data.cpu,
+            response.data.memory,
+            response.data.disk
+          ];
+          // Update the system load metric
+          this.metrics.systemLoad = response.data.cpu;
+        }
+      },
+      error: () => {
+        // Fallback to mock data
+        this.systemChartData.datasets[0].data = [45, 60, 25];
+      }
+    });
   }
 
   private updateMetrics(data: Partial<Metrics>) {

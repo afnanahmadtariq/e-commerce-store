@@ -128,6 +128,55 @@ app.get('/health/services', async (req, res) => {
   });
 });
 
+// System stats endpoint for admin dashboard
+app.get('/api/system/stats', (req, res) => {
+  // Calculate CPU usage
+  const cpus = os.cpus();
+  let totalIdle = 0;
+  let totalTick = 0;
+  
+  cpus.forEach((cpu) => {
+    for (const type in cpu.times) {
+      totalTick += cpu.times[type as keyof typeof cpu.times];
+    }
+    totalIdle += cpu.times.idle;
+  });
+  
+  const cpuUsage = Math.round(((totalTick - totalIdle) / totalTick) * 100);
+  
+  // Calculate memory usage
+  const totalMemory = os.totalmem();
+  const freeMemory = os.freemem();
+  const usedMemory = totalMemory - freeMemory;
+  const memoryUsage = Math.round((usedMemory / totalMemory) * 100);
+  
+  // Disk usage is platform-specific, use a placeholder
+  // In production, you'd use a library like 'diskusage' or 'check-disk-space'
+  const diskUsage = 45; // Placeholder - would need platform-specific implementation
+  
+  // System uptime
+  const uptime = os.uptime();
+  const uptimeHours = Math.floor(uptime / 3600);
+  const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+  
+  res.json({
+    success: true,
+    data: {
+      cpu: cpuUsage,
+      memory: memoryUsage,
+      disk: diskUsage,
+      uptime: `${uptimeHours}h ${uptimeMinutes}m`,
+      uptimeSeconds: uptime,
+      platform: os.platform(),
+      hostname: os.hostname(),
+      totalMemoryGB: Math.round(totalMemory / (1024 * 1024 * 1024) * 10) / 10,
+      freeMemoryGB: Math.round(freeMemory / (1024 * 1024 * 1024) * 10) / 10,
+      cpuCores: cpus.length,
+      loadAverage: os.loadavg(),
+    }
+  });
+});
+
 // Proxy options factory
 const createProxyOptions = (target: string, pathRewrite?: Record<string, string>): Options => ({
   target,
