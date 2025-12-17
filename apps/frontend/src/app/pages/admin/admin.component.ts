@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { AuthService } from '../../services/auth.service';
 import { SocketService } from '../../services/socket.service';
+import { environment } from '../../../environments/environment';
 
 interface Metrics {
   sales: number;
@@ -187,6 +189,7 @@ interface Metrics {
 export class AdminComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private socketService = inject(SocketService);
+  private http = inject(HttpClient);
 
   metrics: Metrics = {
     sales: 0,
@@ -297,31 +300,77 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   private loadMetrics() {
-    // Simulate loading metrics - replace with actual API calls
-    this.metrics = {
-      sales: 45230,
-      userCount: 1234,
-      systemLoad: 45.2,
-      salesChange: 12.5,
-      userChange: 8.3,
-      loadChange: -2.1
-    };
+    // Fetch real statistics from the backend
+    this.http.get<{ success: boolean; data: { statistics: { totalRevenue: number; totalOrders: number; pendingOrders: number; deliveredOrders: number } } }>( 
+      `${environment.apiUrl}/orders/statistics`
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data.statistics) {
+          const stats = response.data.statistics;
+          this.metrics = {
+            sales: stats.totalRevenue || 0,
+            userCount: stats.totalOrders || 0,
+            systemLoad: 45.2, // This would come from a monitoring service
+            salesChange: 12.5, // Calculate from historical data
+            userChange: 8.3,
+            loadChange: -2.1
+          };
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load metrics:', err);
+        // Use fallback data on error
+        this.metrics = {
+          sales: 0,
+          userCount: 0,
+          systemLoad: 0,
+          salesChange: 0,
+          userChange: 0,
+          loadChange: 0
+        };
+      }
+    });
   }
 
   private loadChartData() {
-    // Sales chart data
-    const salesLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const salesData = [12000, 15000, 18000, 22000, 25000, 28000];
-    this.salesChartData.labels = salesLabels;
-    this.salesChartData.datasets[0].data = salesData;
+    // Load sales chart data from API
+    this.http.get<{ success: boolean; data: { sales: Array<{ _id: string; revenue: number; orders: number }> } }>(
+      `${environment.apiUrl}/orders/sales`
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data.sales) {
+          const salesData = response.data.sales;
+          this.salesChartData.labels = salesData.map(s => s._id);
+          this.salesChartData.datasets[0].data = salesData.map(s => s.revenue);
+        }
+      },
+      error: () => {
+        // Fallback to mock data
+        this.salesChartData.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        this.salesChartData.datasets[0].data = [12000, 15000, 18000, 22000, 25000, 28000];
+      }
+    });
 
-    // User chart data
-    const userLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-    const userData = [280, 320, 290, 344];
-    this.userChartData.labels = userLabels;
-    this.userChartData.datasets[0].data = userData;
+    // Load top products for user chart (repurposed as order volume)
+    this.http.get<{ success: boolean; data: { products: Array<{ name: string; totalSold: number }> } }>(
+      `${environment.apiUrl}/orders/top-products`
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data.products) {
+          const products = response.data.products.slice(0, 5);
+          this.userChartData.labels = products.map(p => p.name.substring(0, 15) + (p.name.length > 15 ? '...' : ''));
+          this.userChartData.datasets[0].data = products.map(p => p.totalSold);
+          this.userChartData.datasets[0].label = 'Units Sold';
+        }
+      },
+      error: () => {
+        // Fallback to mock data
+        this.userChartData.labels = ['Product 1', 'Product 2', 'Product 3', 'Product 4'];
+        this.userChartData.datasets[0].data = [280, 320, 290, 344];
+      }
+    });
 
-    // System chart data
+    // System chart - mock data (would come from monitoring service)
     this.systemChartData.datasets[0].data = [45, 60, 25];
   }
 

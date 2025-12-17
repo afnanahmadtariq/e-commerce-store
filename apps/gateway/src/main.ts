@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
 import dotenv from 'dotenv';
+import os from 'os';
 import { authMiddleware } from './auth.middleware';
 
 dotenv.config();
