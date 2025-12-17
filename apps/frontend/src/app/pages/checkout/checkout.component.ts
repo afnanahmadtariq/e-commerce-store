@@ -79,10 +79,6 @@ import { AuthService } from '../../services/auth.service';
                       <input type="radio" name="payment" value="credit_card" [(ngModel)]="paymentMethod" />
                       <span>💳 Credit Card</span>
                     </label>
-                    <label class="payment-option" [class.selected]="paymentMethod === 'paypal'">
-                      <input type="radio" name="payment" value="paypal" [(ngModel)]="paymentMethod" />
-                      <span>🅿️ PayPal</span>
-                    </label>
                     <label class="payment-option" [class.selected]="paymentMethod === 'cash_on_delivery'">
                       <input type="radio" name="payment" value="cash_on_delivery" [(ngModel)]="paymentMethod" />
                       <span>💵 Cash on Delivery</span>
