@@ -11,7 +11,7 @@ import { authMiddleware } from './auth.middleware';
 
 dotenv.config();
 
-const host = process.env['HOST'] ?? 'localhost';
+const host = process.env['HOST'] ?? '0.0.0.0';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3000;
 
 // Service URLs
@@ -134,31 +134,31 @@ app.get('/api/system/stats', (req, res) => {
   const cpus = os.cpus();
   let totalIdle = 0;
   let totalTick = 0;
-  
+
   cpus.forEach((cpu) => {
     for (const type in cpu.times) {
       totalTick += cpu.times[type as keyof typeof cpu.times];
     }
     totalIdle += cpu.times.idle;
   });
-  
+
   const cpuUsage = Math.round(((totalTick - totalIdle) / totalTick) * 100);
-  
+
   // Calculate memory usage
   const totalMemory = os.totalmem();
   const freeMemory = os.freemem();
   const usedMemory = totalMemory - freeMemory;
   const memoryUsage = Math.round((usedMemory / totalMemory) * 100);
-  
+
   // Disk usage is platform-specific, use a placeholder
   // In production, you'd use a library like 'diskusage' or 'check-disk-space'
   const diskUsage = 45; // Placeholder - would need platform-specific implementation
-  
+
   // System uptime
   const uptime = os.uptime();
   const uptimeHours = Math.floor(uptime / 3600);
   const uptimeMinutes = Math.floor((uptime % 3600) / 60);
-  
+
   res.json({
     success: true,
     data: {

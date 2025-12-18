@@ -9,7 +9,7 @@ import { errorHandler, notFound } from './middleware';
 
 dotenv.config();
 
-const host = process.env['HOST'] ?? 'localhost';
+const host = process.env['HOST'] ?? '0.0.0.0';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3002;
 const dbName = process.env['DB_NAME'] || 'ecommerce_products';
 const baseUri = process.env['MONGODB_URI'] || 'mongodb://localhost:27017';
