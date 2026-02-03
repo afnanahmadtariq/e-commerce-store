@@ -6,12 +6,16 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { cartRoutes } from './routes';
 import { CartService } from './services';
 import { setupCartSocket } from './socket';
 import { AppError } from './AppError';
 
-dotenv.config();
+// Load .env.local for development, fallback to .env
+const envFile = fs.existsSync(path.join(process.cwd(), '.env.local')) ? '.env.local' : '.env';
+dotenv.config({ path: path.join(process.cwd(), envFile) });
 
 const host = process.env['HOST'] ?? '0.0.0.0';
 const port = process.env['PORT'] ? Number(process.env['PORT']) : 3003;

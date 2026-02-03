@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService, LoginRequest } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
     selector: 'app-login',
@@ -236,6 +237,7 @@ import { AuthService, LoginRequest } from '../../services/auth.service';
 export class LoginComponent {
     authService = inject(AuthService);
     router = inject(Router);
+    cartService = inject(CartService);
 
     credentials: LoginRequest = {
         email: '',
@@ -257,7 +259,11 @@ export class LoginComponent {
 
         this.authService.login(this.credentials).subscribe({
             next: () => {
-                this.router.navigate(['/']);
+                // Merge guest cart with user cart after successful login
+                this.cartService.mergeCarts().subscribe({
+                    next: () => this.router.navigate(['/']),
+                    error: () => this.router.navigate(['/']) // Navigate even if merge fails
+                });
             },
             error: (err) => {
                 this.loading = false;

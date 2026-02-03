@@ -114,7 +114,7 @@ import { AuthService, RegisterRequest } from '../../services/auth.service';
                   }
                 </button>
               </div>
-              <p class="form-hint">Must be at least 8 characters with uppercase, lowercase, and number</p>
+              <p class="form-hint">Must be at least 8 characters with uppercase, lowercase, number, and special character</p>
             </div>
 
             <div class="form-group">

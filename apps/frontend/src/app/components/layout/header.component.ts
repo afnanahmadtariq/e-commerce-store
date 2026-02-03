@@ -13,8 +13,7 @@ import { CartService } from '../../services/cart.service';
       <div class="container header-content">
         <!-- Logo -->
         <a routerLink="/" class="logo">
-          <span class="logo-icon">🛍️</span>
-          <span class="logo-text">ShopVerse</span>
+          <img src="E-Commerce Logo.svg" alt="ShopVerse" class="logo-img" />
         </a>
 
         <!-- Navigation -->
@@ -148,18 +147,9 @@ import { CartService } from '../../services/cart.service';
       text-decoration: none;
     }
 
-    .logo-icon {
-      font-size: 1.75rem;
-    }
-
-    .logo-text {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .logo-img {
+      height: 40px;
+      width: auto;
     }
 
     .nav {
@@ -230,6 +220,7 @@ import { CartService } from '../../services/cart.service';
       display: flex;
       align-items: center;
       gap: var(--space-md);
+      margin-left: auto;
     }
 
     .cart-btn {

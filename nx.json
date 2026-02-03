@@ -9,7 +9,7 @@
     ],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
-  "nxCloudId": "69358c9b77e3f96e17f2f3e8",
+  "neverConnectToCloud": true,
   "targetDefaults": {
     "@angular/build:application": {
       "cache": true,

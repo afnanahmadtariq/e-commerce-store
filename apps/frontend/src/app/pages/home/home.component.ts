@@ -248,7 +248,7 @@ import { environment } from '../../../environments/environment';
     styles: [`
     /* Hero Section */
     .hero {
-      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #ddd6fe 100%);
+      background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 50%, #e4e4e7 100%);
       padding: var(--space-3xl) 0;
       overflow: hidden;
     }
@@ -292,10 +292,8 @@ import { environment } from '../../../environments/environment';
     }
 
     .gradient-text {
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--gray-900);
+      font-style: italic;
     }
 
     .hero p {
@@ -493,10 +491,7 @@ import { environment } from '../../../environments/environment';
     .stat-value strong {
       font-size: 2rem;
       font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--gray-900);
     }
 
     .stat-label {

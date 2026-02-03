@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+tmp
+.angular
+
+# Version control
+.git
+.gitignore
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Test files
+coverage
+*.spec.ts
+*.test.ts
+jest.config.*
+cypress
+e2e
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Environment files (use Docker env vars instead)
+.env
+.env.local
+.env.*.local
+
+# Misc
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.nx/cache
