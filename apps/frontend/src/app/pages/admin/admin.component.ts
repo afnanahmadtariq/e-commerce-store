@@ -16,6 +16,17 @@ interface Metrics {
   loadChange: number;
 }
 
+interface ChartUpdateData {
+  labels?: string[];
+  values?: number[];
+}
+
+interface SystemUpdateData {
+  cpu?: number;
+  memory?: number;
+  disk?: number;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -254,7 +265,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   };
 
-  private updateInterval: any;
+  private updateInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {
     this.loadInitialData();
@@ -268,7 +279,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
     }
-    this.socketService.disconnect();
+    // Properly unsubscribe from all socket events before disconnecting
+    this.socketService.off('metrics:update');
+    this.socketService.off('sales:update');
+    this.socketService.off('users:update');
+    this.socketService.off('system:update');
+    this.socketService.emit('admin:leave');
   }
 
   private loadInitialData() {
@@ -282,19 +298,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.socketService.emit('admin:join');
 
     // Listen for real-time updates
-    this.socketService.on('metrics:update', (data: Partial<Metrics>) => {
+    this.socketService.on('metrics:update', (...args: unknown[]) => {
+      const data = args[0] as Partial<Metrics>;
       this.updateMetrics(data);
     });
 
-    this.socketService.on('sales:update', (data: any) => {
+    this.socketService.on('sales:update', (...args: unknown[]) => {
+      const data = args[0] as ChartUpdateData;
       this.updateSalesChart(data);
     });
 
-    this.socketService.on('users:update', (data: any) => {
+    this.socketService.on('users:update', (...args: unknown[]) => {
+      const data = args[0] as ChartUpdateData;
       this.updateUserChart(data);
     });
 
-    this.socketService.on('system:update', (data: any) => {
+    this.socketService.on('system:update', (...args: unknown[]) => {
+      const data = args[0] as SystemUpdateData;
       this.updateSystemChart(data);
     });
   }
@@ -396,7 +416,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.metrics = { ...this.metrics, ...data };
   }
 
-  private updateSalesChart(data: any) {
+  private updateSalesChart(data: ChartUpdateData) {
     // Update sales chart with new data
     if (data.labels && data.values) {
       this.salesChartData.labels = data.labels;
@@ -404,7 +424,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateUserChart(data: any) {
+  private updateUserChart(data: ChartUpdateData) {
     // Update user chart with new data
     if (data.labels && data.values) {
       this.userChartData.labels = data.labels;
@@ -412,7 +432,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateSystemChart(data: any) {
+  private updateSystemChart(data: SystemUpdateData) {
     // Update system chart with new data
     if (data.cpu !== undefined && data.memory !== undefined && data.disk !== undefined) {
       this.systemChartData.datasets[0].data = [data.cpu, data.memory, data.disk];

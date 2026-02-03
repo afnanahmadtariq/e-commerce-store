@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -85,10 +85,13 @@ export class ProfileComponent {
     updating = false;
 
     constructor() {
-        const user = this.authService.currentUser();
-        if (user) {
-            this.profileData = { firstName: user.firstName, lastName: user.lastName, phone: user.phone || '' };
-        }
+        // Use effect to reactively update profile data when user changes
+        effect(() => {
+            const user = this.authService.currentUser();
+            if (user && !this.updating) {
+                this.profileData = { firstName: user.firstName, lastName: user.lastName, phone: user.phone || '' };
+            }
+        });
     }
 
     getUserInitials(): string {

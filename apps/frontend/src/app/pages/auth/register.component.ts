@@ -22,14 +22,19 @@ import { AuthService, RegisterRequest } from '../../services/auth.service';
           </div>
 
           <form (ngSubmit)="onSubmit()" class="auth-form">
-            <div *ngIf="error" class="alert alert-error">
-              <ng-container *ngIf="isArray(error); else singleError">
-                <ul style="margin:0; padding-left:1.2em;">
-                  <li *ngFor="let errMsg of error">{{ errMsg }}</li>
-                </ul>
-              </ng-container>
-              <ng-template #singleError>{{ error }}</ng-template>
-            </div>
+            @if (error) {
+              <div class="alert alert-error">
+                @if (isArray(error)) {
+                  <ul style="margin:0; padding-left:1.2em;">
+                    @for (errMsg of asStringArray(error); track errMsg) {
+                      <li>{{ errMsg }}</li>
+                    }
+                  </ul>
+                } @else {
+                  {{ error }}
+                }
+              </div>
+            }
 
             <div class="form-row">
               <div class="form-group">
@@ -282,7 +287,8 @@ import { AuthService, RegisterRequest } from '../../services/auth.service';
   `]
 })
 export class RegisterComponent {
-      isArray = Array.isArray;
+    isArray = Array.isArray;
+    asStringArray = (val: string | string[]): string[] => val as string[];
     authService = inject(AuthService);
     router = inject(Router);
 

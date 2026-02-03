@@ -18,7 +18,8 @@ export class SocketService {
 
   private connect(): void {
     if (!this.socket) {
-      this.socket = io(environment.apiUrl, {
+      // Use wsUrl for WebSocket connection (without /api path)
+      this.socket = io(environment.wsUrl, {
         transports: ['websocket', 'polling'],
         upgrade: true,
         rememberUpgrade: true,
@@ -39,22 +40,22 @@ export class SocketService {
     }
   }
 
-  emit(event: string, data?: any): void {
+  emit(event: string, data?: unknown): void {
     if (this.socket && this.socket.connected) {
       this.socket.emit(event, data);
     }
   }
 
-  on(event: string, callback: (...args: any[]) => void): void {
+  on(event: string, callback: (...args: unknown[]) => void): void {
     if (this.socket) {
-      this.socket.on(event, callback);
+      this.socket.on(event, callback as (...args: unknown[]) => void);
     }
   }
 
-  off(event: string, callback?: (...args: any[]) => void): void {
+  off(event: string, callback?: (...args: unknown[]) => void): void {
     if (this.socket) {
       if (callback) {
-        this.socket.off(event, callback);
+        this.socket.off(event, callback as (...args: unknown[]) => void);
       } else {
         this.socket.off(event);
       }

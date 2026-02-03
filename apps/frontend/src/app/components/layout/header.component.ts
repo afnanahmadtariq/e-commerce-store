@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 
@@ -377,6 +377,7 @@ import { CartService } from '../../services/cart.service';
 export class HeaderComponent {
   authService = inject(AuthService);
   cartService = inject(CartService);
+  private router = inject(Router);
 
   showUserMenu = false;
   showMobileMenu = false;
@@ -403,8 +404,9 @@ export class HeaderComponent {
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.value.trim()) {
-      // Navigate to products with search query
-      window.location.href = `/products?search=${encodeURIComponent(input.value.trim())}`;
+      // Navigate to products with search query using Angular Router
+      this.router.navigate(['/products'], { queryParams: { search: input.value.trim() } });
+      input.value = '';
     }
   }
 }
