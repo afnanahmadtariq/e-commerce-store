@@ -71,7 +71,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "product-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "args": ["--env-file=.env.local"]
       },
       "configurations": {
         "development": {

@@ -69,7 +69,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "cart-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "args": ["--env-file=.env.local"]
       },
       "configurations": {
         "development": {
